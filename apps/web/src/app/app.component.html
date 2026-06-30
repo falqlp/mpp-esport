@@ -1,0 +1,155 @@
+<main class="shell" *ngIf="data$ | async as data">
+  <mat-toolbar class="topbar">
+    <div class="brand">
+      <span class="eyebrow">League of Legends</span>
+      <h1>MPP Esport</h1>
+    </div>
+    <span class="toolbar-spacer"></span>
+    <mat-chip>V1 Summer Split</mat-chip>
+  </mat-toolbar>
+
+  <mat-card appearance="outlined" class="api-warning" *ngIf="!data.apiAvailable">
+    <mat-card-content>
+      <span class="warning-symbol" aria-hidden="true">!</span>
+      <span>API NestJS indisponible. Lance <code>yarn dev:api</code>, puis recharge le front.</span>
+    </mat-card-content>
+  </mat-card>
+
+  <section class="grid">
+    <mat-card appearance="outlined" class="panel span-full filter-panel">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Compétition</mat-label>
+        <mat-select [formControl]="competitionControl">
+          <mat-option value="all">Toutes les compétitions</mat-option>
+          <mat-option *ngFor="let competition of competitions(data.matches)" [value]="competition.value">
+            {{ competition.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="panel span-2">
+      <mat-card-header>
+        <mat-card-title-group>
+          <mat-card-subtitle class="eyebrow">À venir</mat-card-subtitle>
+          <mat-card-title>Matchs ouverts aux pronos</mat-card-title>
+          <mat-chip>{{ filteredMatches(data.upcomingMatches).length }} matchs</mat-chip>
+        </mat-card-title-group>
+      </mat-card-header>
+      <mat-card-content class="match-list">
+        <button class="match-row" type="button" *ngFor="let match of filteredMatches(data.upcomingMatches)" (click)="selectMatch(match)">
+          <span class="league">
+            <strong>{{ match.league }}</strong>
+            <small>{{ match.tournament }} · {{ match.format }}</small>
+          </span>
+          <span class="teams">
+            <span class="team-badge" [class.has-logo]="match.teams[0].logoUrl" [style.--team-color]="match.teams[0].logoColor">
+              <img *ngIf="match.teams[0].logoUrl; else teamACode" [src]="match.teams[0].logoUrl" [alt]="match.teams[0].name">
+              <ng-template #teamACode>{{ match.teams[0].code }}</ng-template>
+            </span>
+            <span class="versus">VS</span>
+            <span class="team-badge" [class.has-logo]="match.teams[1].logoUrl" [style.--team-color]="match.teams[1].logoColor">
+              <img *ngIf="match.teams[1].logoUrl; else teamBCode" [src]="match.teams[1].logoUrl" [alt]="match.teams[1].name">
+              <ng-template #teamBCode>{{ match.teams[1].code }}</ng-template>
+            </span>
+          </span>
+          <time>{{ match.startsAt | date:'EEE d MMM, HH:mm' }}</time>
+          <span class="row-arrow" aria-hidden="true">›</span>
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="panel prediction-panel">
+      <mat-card-header>
+        <mat-card-subtitle class="eyebrow">Prono</mat-card-subtitle>
+        <mat-card-title>Ton ticket</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="submitPrediction(data.matches)">
+          <mat-form-field appearance="outline">
+            <mat-label>Pseudo</mat-label>
+            <input matInput type="text" formControlName="playerName" placeholder="Ton pseudo">
+            <mat-error>Entre au moins 2 caractères.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Match</mat-label>
+            <mat-select formControlName="matchId">
+              <mat-option value="">Choisir un match</mat-option>
+              <mat-option *ngFor="let match of filteredMatches(data.upcomingMatches)" [value]="match.id">
+                {{ match.teams[0].code }} vs {{ match.teams[1].code }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="score-grid" *ngIf="selectedMatch() as match">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ match.teams[0].name }}</mat-label>
+              <input matInput type="number" min="0" [max]="match.format === 'BO1' ? 1 : match.format === 'BO3' ? 2 : 3" formControlName="scoreA">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ match.teams[1].name }}</mat-label>
+              <input matInput type="number" min="0" [max]="match.format === 'BO1' ? 1 : match.format === 'BO3' ? 2 : 3" formControlName="scoreB">
+            </mat-form-field>
+          </div>
+          <p class="score-error" *ngIf="scoreErrorMessage() && (form.controls.scoreA.dirty || form.controls.scoreB.dirty || form.controls.scoreA.touched || form.controls.scoreB.touched)">
+            {{ scoreErrorMessage() }}
+          </p>
+
+          <button mat-flat-button class="primary-action" type="submit">
+            Valider le prono
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="panel leaderboard-panel">
+      <mat-card-header>
+        <mat-card-subtitle class="eyebrow">Ligue privée</mat-card-subtitle>
+        <mat-card-title>Classement</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list class="leaderboard">
+          <mat-list-item *ngFor="let player of data.leaderboard; let index = index">
+            <span matListItemIcon class="rank">{{ index + 1 }}</span>
+            <strong matListItemTitle>{{ player.playerName }}</strong>
+            <span matListItemMeta>{{ player.points }} pts</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="panel span-2">
+      <mat-card-header>
+        <mat-card-subtitle class="eyebrow">Résultats</mat-card-subtitle>
+        <mat-card-title>Matchs terminés</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="results">
+        <mat-card appearance="outlined" *ngFor="let match of filteredMatches(data.finishedMatches)">
+          <mat-card-subtitle>{{ match.league }}</mat-card-subtitle>
+          <mat-card-title>{{ match.teams[0].code }} {{ match.result?.score?.[0] }} – {{ match.result?.score?.[1] }} {{ match.teams[1].code }}</mat-card-title>
+          <mat-card-content>Vainqueur : {{ teamName(match, match.result?.winnerId ?? '') }}</mat-card-content>
+        </mat-card>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="panel span-full" *ngIf="majorTeams(data.matches) as teams">
+      <mat-card-header *ngIf="teams.length">
+        <mat-card-subtitle class="eyebrow">Régions majeures</mat-card-subtitle>
+        <mat-card-title>Équipes LCS · LEC · LCK · LPL</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="team-gallery" *ngIf="teams.length">
+        <article class="team-card" *ngFor="let team of teams">
+          <span class="team-logo-large" [style.--team-color]="team.logoColor">
+            <img *ngIf="team.logoUrl; else galleryCode" [src]="team.logoUrl" [alt]="team.name" loading="lazy">
+            <ng-template #galleryCode>{{ team.code }}</ng-template>
+          </span>
+          <span>
+            <strong>{{ team.name }}</strong>
+            <small>{{ team.code }}</small>
+          </span>
+        </article>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</main>

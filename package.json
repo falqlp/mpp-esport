@@ -1,0 +1,22 @@
+{
+  "name": "mpp-esport",
+  "private": true,
+  "version": "0.1.0",
+  "description": "V1 d'une application de pronostics esport orientee League of Legends.",
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "yarn dev:api",
+    "dev:api": "yarn workspace @mpp-esport/api start:dev",
+    "dev:web": "yarn workspace @mpp-esport/web start",
+    "build": "yarn build:api && yarn build:web",
+    "build:api": "yarn workspace @mpp-esport/api build",
+    "build:web": "yarn workspace @mpp-esport/web build"
+  }
+}
