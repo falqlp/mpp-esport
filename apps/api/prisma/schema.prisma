@@ -12,6 +12,7 @@ model User {
   email        String   @unique
   displayName  String
   passwordHash String
+  favoriteCompetitions String[] @default([])
   createdAt    DateTime @default(now())
 
   @@map("users")
@@ -35,6 +36,7 @@ model Prediction {
 model Match {
   id         String   @id
   league     String
+  leagueLogoUrl String?
   tournament String
   startsAt   DateTime
   format     String

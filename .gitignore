@@ -1,4 +1,6 @@
 node_modules/
+coverage/
+apps/api/coverage/
 dist/
 .angular/
 apps/api/.env

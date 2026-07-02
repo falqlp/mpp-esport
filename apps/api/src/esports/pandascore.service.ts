@@ -15,7 +15,7 @@ interface PandaMatch {
   begin_at: string | null;
   number_of_games: number | null;
   winner_id: number | null;
-  league: { name: string };
+  league: { name: string; image_url: string | null };
   serie: { full_name: string | null; name: string | null } | null;
   tournament: { name: string };
   opponents: Array<{ opponent: PandaTeam }>;
@@ -147,6 +147,7 @@ export class PandaScoreService {
     return {
       id: `pandascore-${match.id}`,
       league: match.league.name,
+      ...(match.league.image_url ? { leagueLogoUrl: match.league.image_url } : {}),
       tournament: match.serie?.full_name ?? match.serie?.name ?? match.tournament.name,
       startsAt: match.scheduled_at,
       format: match.number_of_games === 5 ? 'BO5' : match.number_of_games === 3 ? 'BO3' : 'BO1',

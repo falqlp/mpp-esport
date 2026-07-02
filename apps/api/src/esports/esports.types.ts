@@ -11,6 +11,7 @@ export interface Team {
 export interface LolMatch {
   id: string;
   league: string;
+  leagueLogoUrl?: string;
   tournament: string;
   startsAt: string;
   format: 'BO1' | 'BO3' | 'BO5';

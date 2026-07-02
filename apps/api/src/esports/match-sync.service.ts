@@ -83,6 +83,7 @@ export class MatchSyncService {
     return {
       id: match.id,
       league: match.league,
+      leagueLogoUrl: match.leagueLogoUrl ?? null,
       tournament: match.tournament,
       startsAt: new Date(match.startsAt),
       format: match.format,

@@ -15,6 +15,7 @@ V1 d'une application de pronostics esport orientée League of Legends, avec un f
 - Points calculés automatiquement.
 - Classement des joueurs.
 - Pronostics et matchs persistés dans PostgreSQL avec Prisma.
+- Profil personnalisable avec compétitions favorites (LEC, LCK, LCS, LPL, MSI, First Stand et Worlds).
 
 ## Démarrage
 
@@ -57,6 +58,17 @@ Par défaut :
 - API NestJS : `http://localhost:3000/api`
 - Web Angular : `http://localhost:4200`
 
+Une fois connecté, choisis tes compétitions dans **Mon profil > Compétitions suivies**. Le filtre **Mes compétitions favorites** regroupe tous les matchs correspondants. Pour LEC et LCK, le suivi porte sur la compétition entière et inclut donc tous les splits et playoffs, y compris les prochaines saisons.
+
+### Dépannage Prisma
+
+Si TypeScript indique qu'un modèle du schéma (par exemple `user`) n'existe pas sur `PrismaService`, le client Prisma généré est probablement obsolète. Régénère-le puis relance l'API :
+
+```bash
+yarn workspace @mpp-esport/api db:generate
+yarn dev:api
+```
+
 ## Actualiser les données PandaScore
 
 L'API doit être lancée. Envoie une requête `POST` sans corps à l'endpoint de synchronisation.
@@ -91,6 +103,29 @@ Une synchronisation automatique est aussi lancée à minuit et midi.
 - Ajouter une vraie authentification.
 - Ajouter les ligues privées et invitations.
 - Ajouter l'authentification des joueurs.
+
+## Qualité du code
+
+Lance ESLint sur l'API, le front Angular et ses templates :
+
+```bash
+yarn lint
+```
+
+Pour appliquer automatiquement les corrections disponibles :
+
+```bash
+yarn lint:fix
+```
+
+La GitHub Action `.github/workflows/ci.yml` exécute automatiquement l'installation, le lint et les builds API/web sur chaque pull request et sur les pushes vers `main`.
+
+Les tests backend suivent un workflow TDD et se lancent avec :
+
+```bash
+yarn test:api
+yarn test:api:coverage
+```
 
 ## Déploiement
 

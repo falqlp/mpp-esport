@@ -4,7 +4,9 @@ import { promisify } from 'node:util';
 import { PrismaService } from '../prisma.service';
 
 const scrypt = promisify(scryptCallback);
-export interface AuthUser { id: string; email: string; displayName: string }
+export const COMPETITION_KEYS = ['LEC', 'LCK', 'LCS', 'LPL', 'MSI', 'FIRST_STAND', 'WORLDS'] as const;
+export type CompetitionKey = typeof COMPETITION_KEYS[number];
+export interface AuthUser { id: string; email: string; displayName: string; favoriteCompetitions: string[] }
 
 @Injectable()
 export class AuthService {
@@ -38,7 +40,7 @@ export class AuthService {
       const data = JSON.parse(Buffer.from(payload, 'base64url').toString()) as { sub: string; exp: number };
       if (data.exp < Date.now()) return undefined;
       const user = await this.prisma.user.findUnique({ where: { id: data.sub } });
-      return user ? { id: user.id, email: user.email, displayName: user.displayName } : undefined;
+      return user ? this.toAuthUser(user) : undefined;
     } catch { return undefined; }
   }
 
@@ -47,9 +49,21 @@ export class AuthService {
     return user;
   }
 
+  async updateFavoriteCompetitions(userId: string, values?: unknown): Promise<AuthUser> {
+    if (!Array.isArray(values) || values.some((value) => typeof value !== 'string' || !COMPETITION_KEYS.includes(value as CompetitionKey))) {
+      throw new BadRequestException('Liste de compétitions invalide');
+    }
+    const favoriteCompetitions = [...new Set(values as CompetitionKey[])];
+    const user = await this.prisma.user.update({ where: { id: userId }, data: { favoriteCompetitions } });
+    return this.toAuthUser(user);
+  }
+
   private session(user: AuthUser) {
     const payload = Buffer.from(JSON.stringify({ sub: user.id, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 })).toString('base64url');
-    return { token: `${payload}.${this.sign(payload)}`, user: { id: user.id, email: user.email, displayName: user.displayName } };
+    return { token: `${payload}.${this.sign(payload)}`, user: this.toAuthUser(user) };
+  }
+  private toAuthUser(user: AuthUser): AuthUser {
+    return { id: user.id, email: user.email, displayName: user.displayName, favoriteCompetitions: user.favoriteCompetitions ?? [] };
   }
   private sign(payload: string): string { return createHmac('sha256', process.env.AUTH_SECRET ?? 'dev-only-change-me').update(payload).digest('base64url'); }
   private validEmail(value?: string): string {

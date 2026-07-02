@@ -127,6 +127,7 @@ export class EsportsService {
     return {
       id: match.id,
       league: match.league,
+      ...(match.leagueLogoUrl ? { leagueLogoUrl: match.leagueLogoUrl } : {}),
       tournament: match.tournament,
       startsAt: match.startsAt.toISOString(),
       format: match.format as LolMatch['format'],

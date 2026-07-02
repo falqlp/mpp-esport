@@ -2,7 +2,8 @@ import { HttpClient, HttpInterceptorFn } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-export interface AuthUser { id: string; email: string; displayName: string }
+export type CompetitionKey = 'LEC' | 'LCK' | 'LCS' | 'LPL' | 'MSI' | 'FIRST_STAND' | 'WORLDS';
+export interface AuthUser { id: string; email: string; displayName: string; favoriteCompetitions: CompetitionKey[] }
 interface AuthSession { token: string; user: AuthUser }
 const TOKEN_KEY = 'mpp-auth-token';
 const USER_KEY = 'mpp-auth-user';
@@ -26,6 +27,10 @@ export class AuthService {
     return this.http.post<AuthSession>('http://localhost:3000/api/auth/register', { email, displayName, password })
       .pipe(tap((session) => this.save(session)));
   }
+  updateFavoriteCompetitions(favoriteCompetitions: CompetitionKey[]): Observable<AuthUser> {
+    return this.http.put<AuthUser>('http://localhost:3000/api/auth/me/favorite-competitions', { favoriteCompetitions })
+      .pipe(tap((user) => this.saveUser(user)));
+  }
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
@@ -33,11 +38,18 @@ export class AuthService {
   }
   private save(session: AuthSession): void {
     localStorage.setItem(TOKEN_KEY, session.token);
-    localStorage.setItem(USER_KEY, JSON.stringify(session.user));
-    this.userSubject.next(session.user);
+    this.saveUser(session.user);
+  }
+  private saveUser(user: AuthUser): void {
+    const normalized = { ...user, favoriteCompetitions: user.favoriteCompetitions ?? [] };
+    localStorage.setItem(USER_KEY, JSON.stringify(normalized));
+    this.userSubject.next(normalized);
   }
   private readUser(): AuthUser | null {
-    try { return JSON.parse(localStorage.getItem(USER_KEY) ?? 'null') as AuthUser | null; }
+    try {
+      const user = JSON.parse(localStorage.getItem(USER_KEY) ?? 'null') as AuthUser | null;
+      return user ? { ...user, favoriteCompetitions: user.favoriteCompetitions ?? [] } : null;
+    }
     catch { return null; }
   }
 }

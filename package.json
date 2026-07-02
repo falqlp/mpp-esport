@@ -17,6 +17,17 @@
     "dev:web": "yarn workspace @mpp-esport/web start",
     "build": "yarn build:api && yarn build:web",
     "build:api": "yarn workspace @mpp-esport/api build",
-    "build:web": "yarn workspace @mpp-esport/web build"
+    "build:web": "yarn workspace @mpp-esport/web build",
+    "test:api": "yarn workspace @mpp-esport/api test",
+    "test:api:coverage": "yarn workspace @mpp-esport/api test:coverage",
+    "lint": "node node_modules/eslint/bin/eslint.js \"apps/**/*.{ts,html}\"",
+    "lint:fix": "yarn lint --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "angular-eslint": "^22.0.0",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
+    "typescript-eslint": "^8.62.1"
   }
 }
