@@ -1,23 +1,36 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Match as StoredMatch, Prediction as StoredPrediction } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { CreatePredictionDto, LeaderboardEntry, LolMatch, Prediction, Team } from './esports.types';
 
 @Injectable()
 export class EsportsService {
+  private readonly logger = new Logger(EsportsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getMatches(): Promise<LolMatch[]> {
+    const startedAt = Date.now();
+    this.logger.log('Lecture des matchs dans PostgreSQL…');
     const matches = await this.prisma.match.findMany({ orderBy: { startsAt: 'asc' } });
+    this.logger.log(`${matches.length} matchs lus en ${Date.now() - startedAt}ms`);
     return matches.map((match) => this.toLolMatch(match));
   }
 
-  async getPredictions(): Promise<Prediction[]> {
-    const predictions = await this.prisma.prediction.findMany({ orderBy: { createdAt: 'desc' } });
+  async getPredictions(playerName?: string): Promise<Prediction[]> {
+    const startedAt = Date.now();
+    this.logger.log('Lecture des pronostics dans PostgreSQL…');
+    const predictions = await this.prisma.prediction.findMany({
+      where: playerName ? { playerName } : undefined,
+      orderBy: { createdAt: 'desc' },
+    });
+    this.logger.log(`${predictions.length} pronostics lus en ${Date.now() - startedAt}ms`);
     return predictions.map((prediction) => this.toPrediction(prediction));
   }
 
-  async createPrediction(dto: CreatePredictionDto): Promise<Prediction> {
+  async createPrediction(dto: CreatePredictionDto, authenticatedName: string): Promise<Prediction> {
+    const startedAt = Date.now();
+    this.logger.log(`Enregistrement d'un pronostic pour le match ${dto.matchId}…`);
     const storedMatch = await this.prisma.match.findUnique({ where: { id: dto.matchId } });
     if (!storedMatch) throw new NotFoundException('Match not found');
     const match = this.toLolMatch(storedMatch);
@@ -27,7 +40,7 @@ export class EsportsService {
 
     this.validateScore(match, dto);
     const winnerId = this.winnerFromScore(match, dto.score);
-    const playerName = dto.playerName.trim();
+    const playerName = authenticatedName;
     const prediction = await this.prisma.prediction.upsert({
       where: { matchId_playerName: { matchId: dto.matchId, playerName } },
       create: {
@@ -46,10 +59,13 @@ export class EsportsService {
         createdAt: new Date(),
       },
     });
+    this.logger.log(`Pronostic ${prediction.id} enregistré en ${Date.now() - startedAt}ms`);
     return this.toPrediction(prediction);
   }
 
   async getLeaderboard(): Promise<LeaderboardEntry[]> {
+    const startedAt = Date.now();
+    this.logger.log('Calcul du classement…');
     const board = new Map<string, LeaderboardEntry>();
     const predictions = await this.getPredictions();
     for (const prediction of predictions) {
@@ -62,7 +78,9 @@ export class EsportsService {
       current.predictions += 1;
       board.set(prediction.playerName, current);
     }
-    return [...board.values()].sort((a, b) => b.points - a.points);
+    const leaderboard = [...board.values()].sort((a, b) => b.points - a.points);
+    this.logger.log(`Classement de ${leaderboard.length} joueurs calculé en ${Date.now() - startedAt}ms`);
+    return leaderboard;
   }
 
   private computePoints(match: LolMatch, prediction: CreatePredictionDto): number {

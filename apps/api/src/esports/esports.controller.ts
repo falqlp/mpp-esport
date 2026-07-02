@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { AuthService } from '../auth/auth.service';
 import { CreatePredictionDto } from './esports.types';
 import { EsportsService } from './esports.service';
 import { MatchSyncService } from './match-sync.service';
@@ -8,6 +9,7 @@ export class EsportsController {
   constructor(
     private readonly esportsService: EsportsService,
     private readonly matchSyncService: MatchSyncService,
+    private readonly auth: AuthService,
   ) {}
 
   @Get('matches')
@@ -16,13 +18,15 @@ export class EsportsController {
   }
 
   @Get('predictions')
-  getPredictions() {
-    return this.esportsService.getPredictions();
+  async getPredictions(@Headers('authorization') authorization?: string) {
+    const user = await this.auth.authenticate(authorization);
+    return user ? this.esportsService.getPredictions(user.displayName) : [];
   }
 
   @Post('predictions')
-  createPrediction(@Body() dto: CreatePredictionDto) {
-    return this.esportsService.createPrediction(dto);
+  async createPrediction(@Body() dto: CreatePredictionDto, @Headers('authorization') authorization?: string) {
+    const user = this.auth.requireUser(await this.auth.authenticate(authorization));
+    return this.esportsService.createPrediction(dto, user.displayName);
   }
 
   @Get('leaderboard')

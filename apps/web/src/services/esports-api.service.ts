@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export type MatchStatus = 'upcoming' | 'live' | 'finished';
 
@@ -52,19 +53,19 @@ export class EsportsApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = 'http://localhost:3000/api/esports';
 
-  getMatches() {
+  getMatches(): Observable<LolMatch[]> {
     return this.http.get<LolMatch[]>(`${this.baseUrl}/matches`);
   }
 
-  getPredictions() {
+  getPredictions(): Observable<Prediction[]> {
     return this.http.get<Prediction[]>(`${this.baseUrl}/predictions`);
   }
 
-  getLeaderboard() {
+  getLeaderboard(): Observable<LeaderboardEntry[]> {
     return this.http.get<LeaderboardEntry[]>(`${this.baseUrl}/leaderboard`);
   }
 
-  createPrediction(payload: CreatePredictionPayload) {
+  createPrediction(payload: CreatePredictionPayload): Observable<Prediction> {
     return this.http.post<Prediction>(`${this.baseUrl}/predictions`, payload);
   }
 }

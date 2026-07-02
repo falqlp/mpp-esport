@@ -31,8 +31,14 @@ export class PandaScoreService {
   private pendingRequest?: Promise<LolMatch[]>;
 
   async getMatches(forceRefresh = false): Promise<LolMatch[]> {
-    if (!forceRefresh && this.cache && this.cache.expiresAt > Date.now()) return this.cache.matches;
-    if (this.pendingRequest) return this.pendingRequest;
+    if (!forceRefresh && this.cache && this.cache.expiresAt > Date.now()) {
+      this.logger.debug(`Cache utilisé : ${this.cache.matches.length} matchs`);
+      return this.cache.matches;
+    }
+    if (this.pendingRequest) {
+      this.logger.log('Une requête PandaScore est déjà en cours, attente du même résultat…');
+      return this.pendingRequest;
+    }
 
     this.pendingRequest = this.loadMatches();
     try {
@@ -43,6 +49,8 @@ export class PandaScoreService {
   }
 
   private async loadMatches(): Promise<LolMatch[]> {
+    const startedAt = Date.now();
+    this.logger.log('Chargement des flux PandaScore upcoming, running et past…');
     const [upcoming, running, past] = await Promise.all([
       this.fetchAllPages('/lol/matches/upcoming', 'scheduled_at'),
       this.fetchAllPages('/lol/matches/running', 'scheduled_at'),
@@ -53,6 +61,7 @@ export class PandaScoreService {
       .map((match) => this.toLolMatch(match))
       .filter((match): match is LolMatch => match !== undefined);
     this.cache = { expiresAt: Date.now() + this.cacheDurationMs, matches };
+    this.logger.log(`${matches.length} matchs PandaScore chargés en ${Date.now() - startedAt}ms`);
     return matches;
   }
 
@@ -67,6 +76,8 @@ export class PandaScoreService {
   }
 
   private async fetchAllPages(path: string, sort: string): Promise<PandaMatch[]> {
+    const startedAt = Date.now();
+    this.logger.log(`Chargement du flux ${path}…`);
     const first = await this.requestPage(path, 1, sort);
     const availablePages = Math.ceil(first.total / 100);
     const configuredLimit = Number(process.env.PANDASCORE_MAX_PAGES_PER_FEED ?? 1);
@@ -78,6 +89,7 @@ export class PandaScoreService {
       const result = await this.requestPage(path, page, sort);
       matches.push(...result.items);
     }
+    this.logger.log(`${path} : ${matches.length}/${first.total} matchs chargés en ${Date.now() - startedAt}ms`);
     return matches;
   }
 
@@ -85,6 +97,7 @@ export class PandaScoreService {
     const url = `${path}?page[number]=${page}&page[size]=100&sort=${encodeURIComponent(sort)}`;
     const response = await this.fetch(url);
     const items = (await response.json()) as PandaMatch[];
+    this.logger.debug(`${path} page ${page} : ${items.length} éléments JSON décodés`);
     return { items, total: Number(response.headers.get('x-total') ?? items.length) };
   }
 
@@ -99,12 +112,15 @@ export class PandaScoreService {
       throw new ServiceUnavailableException('PANDASCORE_API_TOKEN is not configured');
     }
 
+    const startedAt = Date.now();
+    this.logger.log(`--> PandaScore GET ${path}`);
     let response: Response;
     try {
       response = await fetch(`${this.baseUrl}${path}`, {
         headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
       });
-    } catch {
+    } catch (error) {
+      this.logger.error(`<-- PandaScore GET ${path} échec après ${Date.now() - startedAt}ms`, error instanceof Error ? error.stack : undefined);
       throw new ServiceUnavailableException('PandaScore API is unreachable');
     }
 
@@ -115,6 +131,7 @@ export class PandaScoreService {
       this.logger.warn(`${message} for ${path}`);
       throw new ServiceUnavailableException(message);
     }
+    this.logger.log(`<-- PandaScore GET ${path} ${response.status} ${Date.now() - startedAt}ms`);
     return response;
   }
 

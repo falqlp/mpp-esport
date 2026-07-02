@@ -34,19 +34,27 @@ export class MatchSyncService {
 
   sync(): Promise<MatchSyncResult> {
     if (!this.runningSync) {
+      this.logger.log('Démarrage de la synchronisation PandaScore');
       this.runningSync = this.performSync().finally(() => {
         this.runningSync = undefined;
       });
+    } else {
+      this.logger.log('Synchronisation déjà en cours, attente du résultat existant');
     }
     return this.runningSync;
   }
 
   private async performSync(): Promise<MatchSyncResult> {
+    const startedAt = Date.now();
     const matches = await this.pandaScore.getMatches(true);
+    this.logger.log(`${matches.length} matchs reçus, écriture PostgreSQL par lots…`);
     let resultsSynced = 0;
 
     for (let index = 0; index < matches.length; index += 100) {
       const batch = matches.slice(index, index + 100);
+      const batchStartedAt = Date.now();
+      const batchNumber = Math.floor(index / 100) + 1;
+      this.logger.log(`Lot ${batchNumber} : écriture de ${batch.length} matchs…`);
       await this.prisma.$transaction(
         batch.map((match) => {
           if (match.result) resultsSynced += 1;
@@ -58,9 +66,11 @@ export class MatchSyncService {
           });
         }),
       );
+      this.logger.log(`Lot ${batchNumber} terminé en ${Date.now() - batchStartedAt}ms`);
     }
 
     const predictionsRecalculated = await this.recalculatePredictions(matches);
+    this.logger.log(`Synchronisation complète terminée en ${Date.now() - startedAt}ms`);
     return {
       matchesSynced: matches.length,
       resultsSynced,
@@ -86,6 +96,9 @@ export class MatchSyncService {
   }
 
   private async recalculatePredictions(matches: LolMatch[]): Promise<number> {
+    const startedAt = Date.now();
+    const finishedMatches = matches.filter((match) => match.result).length;
+    this.logger.log(`Recalcul des pronostics pour ${finishedMatches} matchs terminés…`);
     let count = 0;
     for (const match of matches) {
       if (!match.result) continue;
@@ -99,6 +112,7 @@ export class MatchSyncService {
         count += 1;
       }
     }
+    this.logger.log(`${count} pronostics recalculés en ${Date.now() - startedAt}ms`);
     return count;
   }
 }
