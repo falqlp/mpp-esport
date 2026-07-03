@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export type MatchStatus = 'upcoming' | 'live' | 'finished';
 
@@ -58,7 +59,7 @@ export interface MatchSyncResult {
 @Injectable({ providedIn: 'root' })
 export class EsportsApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3000/api/esports';
+  private readonly baseUrl = `${environment.apiUrl}/esports`;
 
   getMatches(): Observable<LolMatch[]> {
     return this.http.get<LolMatch[]>(`${this.baseUrl}/matches`);

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: mpp-esport-api
+    runtime: node
+    plan: free
+    buildCommand: yarn install --frozen-lockfile && yarn build:api
+    startCommand: yarn workspace @mpp-esport/api start:prod
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: PANDASCORE_API_TOKEN
+        sync: false
+      - key: PANDASCORE_MAX_PAGES_PER_FEED
+        value: 1
+      - key: WEB_ORIGIN
+        value: https://falqlp.github.io

@@ -1,6 +1,7 @@
 import { HttpClient, HttpInterceptorFn } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export type CompetitionKey = 'LEC' | 'LCK' | 'LCS' | 'LPL' | 'MSI' | 'FIRST_STAND' | 'WORLDS';
 export interface AuthUser {
@@ -24,22 +25,23 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl}/auth`;
   private readonly userSubject = new BehaviorSubject<AuthUser | null>(this.readUser());
   readonly user$ = this.userSubject.asObservable();
 
   login(email: string, password: string): Observable<AuthSession> {
     return this.http
-      .post<AuthSession>('http://localhost:3000/api/auth/login', { email, password })
+      .post<AuthSession>(`${this.baseUrl}/login`, { email, password })
       .pipe(tap((session) => this.save(session)));
   }
   register(email: string, displayName: string, password: string): Observable<AuthSession> {
     return this.http
-      .post<AuthSession>('http://localhost:3000/api/auth/register', { email, displayName, password })
+      .post<AuthSession>(`${this.baseUrl}/register`, { email, displayName, password })
       .pipe(tap((session) => this.save(session)));
   }
   updateFavoriteCompetitions(favoriteCompetitions: CompetitionKey[]): Observable<AuthUser> {
     return this.http
-      .put<AuthUser>('http://localhost:3000/api/auth/me/favorite-competitions', { favoriteCompetitions })
+      .put<AuthUser>(`${this.baseUrl}/me/favorite-competitions`, { favoriteCompetitions })
       .pipe(tap((user) => this.saveUser(user)));
   }
   logout(): void {
