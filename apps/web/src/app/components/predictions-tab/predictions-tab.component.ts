@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -38,7 +38,7 @@ import { COMPETITIONS, filterMatches } from '../../competition.utils';
   templateUrl: './predictions-tab.component.html',
   styleUrl: './predictions-tab.component.css',
 })
-export class PredictionsTabComponent implements OnChanges {
+export class PredictionsTabComponent {
   private readonly api = inject(EsportsApiService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
@@ -62,17 +62,12 @@ export class PredictionsTabComponent implements OnChanges {
 
   readonly form = this.fb.group(
     {
-      playerName: this.fb.nonNullable.control(''),
       matchId: this.fb.nonNullable.control('', Validators.required),
       scoreA: new FormControl<number | null>(null, Validators.required),
       scoreB: new FormControl<number | null>(null, Validators.required),
     },
     { validators: this.scoreValidator },
   );
-
-  ngOnChanges(): void {
-    if (this.user) this.form.controls.playerName.setValue(this.user.displayName, { emitEvent: false });
-  }
 
   filtered(): LolMatch[] {
     const visible = this.matches.filter(
@@ -116,7 +111,6 @@ export class PredictionsTabComponent implements OnChanges {
     this.api
       .createPrediction({
         matchId: value.matchId,
-        playerName: this.user.displayName,
         score: [value.scoreA, value.scoreB],
       })
       .pipe(finalize(() => (this.saving = false)))

@@ -20,13 +20,13 @@ export class EsportsController {
   @Get('predictions')
   async getPredictions(@Headers('authorization') authorization?: string) {
     const user = await this.auth.authenticate(authorization);
-    return user ? this.esportsService.getPredictions(user.displayName) : [];
+    return user ? this.esportsService.getPredictions(user.id) : [];
   }
 
   @Post('predictions')
   async createPrediction(@Body() dto: CreatePredictionDto, @Headers('authorization') authorization?: string) {
     const user = this.auth.requireUser(await this.auth.authenticate(authorization));
-    return this.esportsService.createPrediction(dto, user.displayName);
+    return this.esportsService.createPrediction(dto, user);
   }
 
   @Get('leaderboard')
@@ -35,7 +35,14 @@ export class EsportsController {
   }
 
   @Post('sync')
-  syncMatches() {
+  async syncMatches(@Headers('authorization') authorization?: string) {
+    this.auth.requireUser(await this.auth.authenticate(authorization));
     return this.matchSyncService.sync();
+  }
+
+  @Get('sync/status')
+  async getSyncStatus(@Headers('authorization') authorization?: string) {
+    this.auth.requireUser(await this.auth.authenticate(authorization));
+    return this.matchSyncService.getStatus();
   }
 }

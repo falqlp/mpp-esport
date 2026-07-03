@@ -21,3 +21,10 @@
 - Compiler l'application concernée après chaque refactor structurel.
 - Exécuter `yarn format` après les modifications et `yarn format:check` avant de terminer.
 - Préserver les comportements existants pendant un découpage ; séparer autant que possible le refactor des changements fonctionnels.
+
+## Modélisation relationnelle
+
+- Représenter les liens métier entre entités par des relations Prisma et des clés étrangères en base de données.
+- Ne pas utiliser une donnée d'affichage ou métier mutable (pseudo, nom, libellé) comme substitut à l'identifiant d'une entité.
+- Définir explicitement les règles de suppression des relations et les contraintes d'unicité associées.
+- Lorsqu'une API doit afficher une donnée liée, la charger par la relation tout en conservant les identifiants comme références persistées.

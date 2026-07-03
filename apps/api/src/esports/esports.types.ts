@@ -35,7 +35,6 @@ export interface Prediction {
 
 export interface CreatePredictionDto {
   matchId: string;
-  playerName: string;
   score: [number, number];
 }
 

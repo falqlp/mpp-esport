@@ -96,7 +96,7 @@ La réponse ressemble à ceci :
 }
 ```
 
-Une synchronisation automatique est aussi lancée à minuit et midi.
+La synchronisation est tentée automatiquement lorsque l'application charge les données. Une nouvelle demande vers PandaScore n'est autorisée que 15 minutes après la précédente.
 
 ## Prochaines étapes conseillées
 

@@ -39,49 +39,74 @@ describe('EsportsService', () => {
     const { service, prisma } = setup();
     prisma.match.findUnique.mockResolvedValue(null);
     await expect(
-      service.createPrediction({ matchId: 'x', playerName: 'x', score: [2, 1] }, 'Leo'),
+      service.createPrediction({ matchId: 'x', score: [2, 1] }, { id: 'u1', displayName: 'Leo' }),
     ).rejects.toBeInstanceOf(NotFoundException);
     prisma.match.findUnique.mockResolvedValue(match({ status: 'live' }));
     await expect(
-      service.createPrediction({ matchId: 'm1', playerName: 'x', score: [2, 1] }, 'Leo'),
+      service.createPrediction({ matchId: 'm1', score: [2, 1] }, { id: 'u1', displayName: 'Leo' }),
     ).rejects.toBeInstanceOf(BadRequestException);
     prisma.match.findUnique.mockResolvedValue(match());
     await expect(
-      service.createPrediction({ matchId: 'm1', playerName: 'x', score: [1, 1] }, 'Leo'),
+      service.createPrediction({ matchId: 'm1', score: [1, 1] }, { id: 'u1', displayName: 'Leo' }),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
   it('rejects creating or updating a prediction once the start time has passed', async () => {
     const { service, prisma } = setup();
     prisma.match.findUnique.mockResolvedValue(match({ status: 'upcoming', startsAt: new Date(Date.now() - 1000) }));
-    await expect(service.createPrediction({ matchId: 'm1', playerName: 'Leo', score: [2, 1] }, 'Leo')).rejects.toThrow(
-      'Predictions are closed for this match',
-    );
+    await expect(
+      service.createPrediction({ matchId: 'm1', score: [2, 1] }, { id: 'u1', displayName: 'Leo' }),
+    ).rejects.toThrow('Predictions are closed for this match');
     expect(prisma.prediction.upsert).not.toHaveBeenCalled();
   });
-  it('upserts under the authenticated name', async () => {
+  it('links a prediction to the authenticated user and match', async () => {
     const { service, prisma } = setup();
     prisma.match.findUnique.mockResolvedValue(match());
     prisma.prediction.upsert.mockResolvedValue({
       id: 'p',
       matchId: 'm1',
-      playerName: 'Leo',
+      userId: 'u1',
+      user: { displayName: 'Leo' },
       winnerId: 'a',
       scoreA: 2,
       scoreB: 1,
       createdAt: new Date(),
       points: 0,
     });
-    const result = await service.createPrediction({ matchId: 'm1', playerName: 'Hacker', score: [2, 1] }, 'Leo');
+    const result = await service.createPrediction({ matchId: 'm1', score: [2, 1] }, { id: 'u1', displayName: 'Leo' });
     expect(prisma.prediction.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ create: expect.objectContaining({ playerName: 'Leo', winnerId: 'a' }) }),
+      expect.objectContaining({
+        where: { matchId_userId: { matchId: 'm1', userId: 'u1' } },
+        create: expect.objectContaining({ matchId: 'm1', userId: 'u1', winnerId: 'a' }),
+        include: { user: { select: { displayName: true } } },
+      }),
     );
     expect(result.playerName).toBe('Leo');
   });
   it('aggregates and sorts the leaderboard', async () => {
     const { service, prisma } = setup();
     prisma.prediction.findMany.mockResolvedValue([
-      { id: '1', matchId: 'm', playerName: 'A', winnerId: 'x', scoreA: 1, scoreB: 0, createdAt: new Date(), points: 3 },
-      { id: '2', matchId: 'm', playerName: 'B', winnerId: 'x', scoreA: 1, scoreB: 0, createdAt: new Date(), points: 5 },
+      {
+        id: '1',
+        matchId: 'm',
+        userId: 'u1',
+        user: { displayName: 'A' },
+        winnerId: 'x',
+        scoreA: 1,
+        scoreB: 0,
+        createdAt: new Date(),
+        points: 3,
+      },
+      {
+        id: '2',
+        matchId: 'm',
+        userId: 'u2',
+        user: { displayName: 'B' },
+        winnerId: 'x',
+        scoreA: 1,
+        scoreB: 0,
+        createdAt: new Date(),
+        points: 5,
+      },
     ]);
     expect((await service.getLeaderboard()).map((x) => x.playerName)).toEqual(['B', 'A']);
   });

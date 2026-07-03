@@ -39,7 +39,6 @@ export interface Prediction {
 
 export interface CreatePredictionPayload {
   matchId: string;
-  playerName: string;
   score: [number, number];
 }
 
@@ -47,6 +46,13 @@ export interface LeaderboardEntry {
   playerName: string;
   points: number;
   predictions: number;
+}
+
+export interface MatchSyncResult {
+  matchesSynced: number;
+  resultsSynced: number;
+  predictionsRecalculated: number;
+  syncedAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -68,5 +74,9 @@ export class EsportsApiService {
 
   createPrediction(payload: CreatePredictionPayload): Observable<Prediction> {
     return this.http.post<Prediction>(`${this.baseUrl}/predictions`, payload);
+  }
+
+  syncMatches(): Observable<MatchSyncResult> {
+    return this.http.post<MatchSyncResult>(`${this.baseUrl}/sync`, {});
   }
 }

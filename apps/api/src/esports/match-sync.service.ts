@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { LolMatch } from './esports.types';
@@ -12,6 +11,15 @@ export interface MatchSyncResult {
   syncedAt: string;
 }
 
+export interface MatchSyncStatus {
+  lastRequestedAt: string | null;
+  nextAllowedAt: string | null;
+  canSync: boolean;
+}
+
+const SYNC_REQUEST_ID = 'pandascore';
+const SYNC_COOLDOWN_MS = 15 * 60 * 1000;
+
 @Injectable()
 export class MatchSyncService {
   private readonly logger = new Logger(MatchSyncService.name);
@@ -22,26 +30,48 @@ export class MatchSyncService {
     private readonly pandaScore: PandaScoreService,
   ) {}
 
-  @Cron('0 0 */12 * * *', { name: 'pandascore-matches-sync' })
-  async scheduledSync(): Promise<void> {
-    try {
-      const result = await this.sync();
-      this.logger.log(`Synchronisation PandaScore terminée : ${result.matchesSynced} matchs`);
-    } catch (error) {
-      this.logger.error('La synchronisation PandaScore a échoué', error);
-    }
-  }
-
   sync(): Promise<MatchSyncResult> {
     if (!this.runningSync) {
-      this.logger.log('Démarrage de la synchronisation PandaScore');
-      this.runningSync = this.performSync().finally(() => {
+      this.runningSync = this.startRequestedSync().finally(() => {
         this.runningSync = undefined;
       });
     } else {
       this.logger.log('Synchronisation déjà en cours, attente du résultat existant');
     }
     return this.runningSync;
+  }
+
+  async getStatus(): Promise<MatchSyncStatus> {
+    const request = await this.prisma.syncRequest.findUnique({ where: { id: SYNC_REQUEST_ID } });
+    if (!request) return { lastRequestedAt: null, nextAllowedAt: null, canSync: true };
+    const nextAllowedAt = new Date(request.requestedAt.getTime() + SYNC_COOLDOWN_MS);
+    return {
+      lastRequestedAt: request.requestedAt.toISOString(),
+      nextAllowedAt: nextAllowedAt.toISOString(),
+      canSync: Date.now() >= nextAllowedAt.getTime(),
+    };
+  }
+
+  private async startRequestedSync(): Promise<MatchSyncResult> {
+    const status = await this.getStatus();
+    if (!status.canSync) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          message: 'Une synchronisation est autorisée toutes les 15 minutes.',
+          ...status,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    const requestedAt = new Date();
+    await this.prisma.syncRequest.upsert({
+      where: { id: SYNC_REQUEST_ID },
+      create: { id: SYNC_REQUEST_ID, requestedAt },
+      update: { requestedAt },
+    });
+    this.logger.log('Démarrage de la synchronisation PandaScore demandée par un utilisateur');
+    return this.performSync();
   }
 
   private async performSync(): Promise<MatchSyncResult> {

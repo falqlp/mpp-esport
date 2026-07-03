@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Match as StoredMatch, Prediction as StoredPrediction } from '@prisma/client';
+import { Match as StoredMatch, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { CreatePredictionDto, LeaderboardEntry, LolMatch, Prediction, Team } from './esports.types';
 
@@ -17,18 +17,22 @@ export class EsportsService {
     return matches.map((match) => this.toLolMatch(match));
   }
 
-  async getPredictions(playerName?: string): Promise<Prediction[]> {
+  async getPredictions(userId?: string): Promise<Prediction[]> {
     const startedAt = Date.now();
     this.logger.log('Lecture des pronostics dans PostgreSQL…');
     const predictions = await this.prisma.prediction.findMany({
-      where: playerName ? { playerName } : undefined,
+      where: userId ? { userId } : undefined,
       orderBy: { createdAt: 'desc' },
+      include: { user: { select: { displayName: true } } },
     });
     this.logger.log(`${predictions.length} pronostics lus en ${Date.now() - startedAt}ms`);
     return predictions.map((prediction) => this.toPrediction(prediction));
   }
 
-  async createPrediction(dto: CreatePredictionDto, authenticatedName: string): Promise<Prediction> {
+  async createPrediction(
+    dto: CreatePredictionDto,
+    authenticatedUser: { id: string; displayName: string },
+  ): Promise<Prediction> {
     const startedAt = Date.now();
     this.logger.log(`Enregistrement d'un pronostic pour le match ${dto.matchId}…`);
     const storedMatch = await this.prisma.match.findUnique({ where: { id: dto.matchId } });
@@ -40,12 +44,11 @@ export class EsportsService {
 
     this.validateScore(match, dto);
     const winnerId = this.winnerFromScore(match, dto.score);
-    const playerName = authenticatedName;
     const prediction = await this.prisma.prediction.upsert({
-      where: { matchId_playerName: { matchId: dto.matchId, playerName } },
+      where: { matchId_userId: { matchId: dto.matchId, userId: authenticatedUser.id } },
       create: {
         matchId: dto.matchId,
-        playerName,
+        userId: authenticatedUser.id,
         winnerId,
         scoreA: dto.score[0],
         scoreB: dto.score[1],
@@ -58,6 +61,7 @@ export class EsportsService {
         points: this.computePoints(match, dto),
         createdAt: new Date(),
       },
+      include: { user: { select: { displayName: true } } },
     });
     this.logger.log(`Pronostic ${prediction.id} enregistré en ${Date.now() - startedAt}ms`);
     return this.toPrediction(prediction);
@@ -114,11 +118,13 @@ export class EsportsService {
     return score[0] > score[1] ? match.teams[0].id : match.teams[1].id;
   }
 
-  private toPrediction(prediction: StoredPrediction): Prediction {
+  private toPrediction(
+    prediction: Prisma.PredictionGetPayload<{ include: { user: { select: { displayName: true } } } }>,
+  ): Prediction {
     return {
       id: prediction.id,
       matchId: prediction.matchId,
-      playerName: prediction.playerName,
+      playerName: prediction.user.displayName,
       winnerId: prediction.winnerId,
       score: [prediction.scoreA, prediction.scoreB],
       createdAt: prediction.createdAt.toISOString(),

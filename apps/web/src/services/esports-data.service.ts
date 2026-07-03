@@ -30,11 +30,15 @@ export class EsportsDataService {
 
   readonly state$ = this.reloadSubject.pipe(
     switchMap(() =>
-      forkJoin({
-        matches: this.api.getMatches(),
-        leaderboard: this.api.getLeaderboard(),
-        predictions: this.api.getPredictions(),
-      }).pipe(
+      this.api.syncMatches().pipe(
+        catchError(() => of(null)),
+        switchMap(() =>
+          forkJoin({
+            matches: this.api.getMatches(),
+            leaderboard: this.api.getLeaderboard(),
+            predictions: this.api.getPredictions(),
+          }),
+        ),
         timeout(15_000),
         map(({ matches, leaderboard, predictions }): EsportsDataState => ({
           status: 'ready',

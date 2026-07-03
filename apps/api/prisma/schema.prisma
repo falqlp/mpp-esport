@@ -14,6 +14,7 @@ model User {
   passwordHash String
   favoriteCompetitions String[] @default([])
   createdAt    DateTime @default(now())
+  predictions  Prediction[]
 
   @@map("users")
 }
@@ -21,15 +22,17 @@ model User {
 model Prediction {
   id         String   @id @default(cuid())
   matchId    String
-  playerName String
+  userId     String
   winnerId   String
   scoreA     Int
   scoreB     Int
   createdAt  DateTime @default(now())
   points     Int      @default(0)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
-  @@unique([matchId, playerName])
-  @@index([playerName])
+  @@unique([matchId, userId])
+  @@index([userId])
   @@map("predictions")
 }
 
@@ -47,7 +50,15 @@ model Match {
   scoreB     Int?
   syncedAt   DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  predictions Prediction[]
 
   @@index([status, startsAt])
   @@map("matches")
+}
+
+model SyncRequest {
+  id          String   @id
+  requestedAt DateTime
+
+  @@map("sync_requests")
 }
