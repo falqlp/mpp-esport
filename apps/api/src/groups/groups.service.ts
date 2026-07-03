@@ -1,8 +1,10 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma.service';
 
 const groupInclude = { memberships: { include: { user: { select: { id: true, displayName: true } } } } } as const;
+type GroupWithMembers = Prisma.GroupGetPayload<{ include: typeof groupInclude }>;
 
 @Injectable()
 export class GroupsService {
@@ -111,7 +113,7 @@ export class GroupsService {
     return { ...this.summary(group), leaderboard };
   }
 
-  private summary(group: any, revealCode = true) {
+  private summary(group: GroupWithMembers, revealCode = true) {
     return {
       id: group.id,
       name: group.name,
