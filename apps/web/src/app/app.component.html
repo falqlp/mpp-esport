@@ -35,8 +35,8 @@
               [favorites]="user.favoriteCompetitions"
             />
           }
-          @case ('leaderboard') {
-            <app-leaderboard-tab [leaderboard]="state.data.leaderboard" />
+          @case ('groups') {
+            <app-groups-tab />
           }
           @case ('profile') {
             <app-profile-tab [user]="user" (saved)="reload()" />

@@ -29,11 +29,6 @@ export class EsportsController {
     return this.esportsService.createPrediction(dto, user);
   }
 
-  @Get('leaderboard')
-  getLeaderboard() {
-    return this.esportsService.getLeaderboard();
-  }
-
   @Post('sync')
   async syncMatches(@Headers('authorization') authorization?: string) {
     this.auth.requireUser(await this.auth.authenticate(authorization));

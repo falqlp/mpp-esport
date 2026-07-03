@@ -6,9 +6,11 @@ import { PandaScoreService } from './esports/pandascore.service';
 import { MatchSyncService } from './esports/match-sync.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
+import { GroupsController } from './groups/groups.controller';
+import { GroupsService } from './groups/groups.service';
 
 @Module({
-  controllers: [AuthController, EsportsController],
-  providers: [EsportsService, MatchSyncService, PandaScoreService, PrismaService, AuthService],
+  controllers: [AuthController, EsportsController, GroupsController],
+  providers: [EsportsService, MatchSyncService, PandaScoreService, PrismaService, AuthService, GroupsService],
 })
 export class AppModule {}

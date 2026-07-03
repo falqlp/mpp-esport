@@ -43,12 +43,6 @@ export interface CreatePredictionPayload {
   score: [number, number];
 }
 
-export interface LeaderboardEntry {
-  playerName: string;
-  points: number;
-  predictions: number;
-}
-
 export interface MatchSyncResult {
   matchesSynced: number;
   resultsSynced: number;
@@ -67,10 +61,6 @@ export class EsportsApiService {
 
   getPredictions(): Observable<Prediction[]> {
     return this.http.get<Prediction[]>(`${this.baseUrl}/predictions`);
-  }
-
-  getLeaderboard(): Observable<LeaderboardEntry[]> {
-    return this.http.get<LeaderboardEntry[]>(`${this.baseUrl}/leaderboard`);
   }
 
   createPrediction(payload: CreatePredictionPayload): Observable<Prediction> {

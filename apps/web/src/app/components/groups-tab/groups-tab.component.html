@@ -1,0 +1,132 @@
+<section class="groups-layout">
+  <aside class="side">
+    <mat-card appearance="outlined" class="my-groups-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'groups.mine' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="group-list">
+          @for (group of groups(); track group.id) {
+            <button
+              class="group-tile"
+              [class.selected]="selected()?.id === group.id"
+              [attr.aria-pressed]="selected()?.id === group.id"
+              type="button"
+              (click)="open(group.id)"
+            >
+              <span class="group-copy">
+                <strong>{{ group.name }}</strong>
+                <small>{{ group.tournament }} · {{ group.memberCount }} {{ 'groups.members' | translate }}</small>
+              </span>
+              <span class="competition-badge">{{ group.league }}</span>
+              <span class="group-arrow" aria-hidden="true">›</span>
+            </button>
+          } @empty {
+            <p class="empty-state">{{ 'groups.none' | translate }}</p>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="group-actions-card">
+      <mat-tab-group animationDuration="180ms" dynamicHeight>
+        <mat-tab [label]="'groups.join' | translate">
+          <div class="tab-content form">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'groups.invitationCode' | translate }}</mat-label>
+              <input matInput [formControl]="code" />
+            </mat-form-field>
+            <button mat-flat-button type="button" [disabled]="busy() || code.invalid" (click)="joinCode()">
+              {{ 'groups.join' | translate }}
+            </button>
+
+            <div class="section-divider">
+              <span>{{ 'groups.discover' | translate }}</span>
+            </div>
+            <div class="search">
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'groups.search' | translate }}</mat-label>
+                <input matInput type="search" [formControl]="search" (keyup.enter)="searchPublic()" />
+              </mat-form-field>
+              <button mat-stroked-button type="button" (click)="searchPublic()">
+                {{ 'groups.searchAction' | translate }}
+              </button>
+            </div>
+            <div class="public-groups">
+              @for (group of publicGroups(); track group.id) {
+                <div class="public-group">
+                  <span>
+                    <strong>{{ group.name }}</strong>
+                    <small
+                      >{{ group.league }} — {{ group.tournament }} · {{ group.memberCount }}
+                      {{ 'groups.members' | translate }}</small
+                    >
+                  </span>
+                  <button
+                    mat-flat-button
+                    type="button"
+                    [disabled]="busy() || isMember(group.id)"
+                    (click)="joinPublic(group.id)"
+                  >
+                    {{ (isMember(group.id) ? 'groups.alreadyMember' : 'groups.join') | translate }}
+                  </button>
+                </div>
+              } @empty {
+                <p class="empty-state">{{ 'groups.noPublic' | translate }}</p>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab [label]="'groups.createAction' | translate">
+          <div class="tab-content form" [formGroup]="createForm">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'groups.name' | translate }}</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'common.competition' | translate }}</mat-label>
+              <mat-select formControlName="competitionKey">
+                @for (competition of competitions(); track competitionKey(competition)) {
+                  <mat-option [value]="competitionKey(competition)">
+                    {{ competition.league }} — {{ competition.tournament }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox formControlName="isPublic">{{ 'groups.public' | translate }}</mat-checkbox>
+            <button mat-flat-button type="button" [disabled]="busy() || createForm.invalid" (click)="create()">
+              {{ 'groups.createAction' | translate }}
+            </button>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </aside>
+
+  <div class="main">
+    @if (selected(); as currentGroup) {
+      <mat-card appearance="outlined" class="leaderboard-card">
+        <mat-card-header>
+          <mat-card-subtitle>{{ currentGroup.league }} — {{ currentGroup.tournament }}</mat-card-subtitle>
+          <mat-card-title>{{ currentGroup.name }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="invitation-code">
+            {{ 'groups.invitationCode' | translate }}:
+            <strong class="code">{{ currentGroup.invitationCode }}</strong>
+          </p>
+          <mat-list>
+            @for (player of currentGroup.leaderboard; track player.userId; let rank = $index) {
+              <mat-list-item>
+                <span matListItemIcon class="rank">{{ rank + 1 }}</span>
+                <strong matListItemTitle>{{ player.playerName }}</strong>
+                <span matListItemMeta>{{ player.points }} {{ 'common.points' | translate }}</span>
+              </mat-list-item>
+            }
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</section>

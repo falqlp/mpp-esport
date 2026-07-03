@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { TranslatePipe } from '../../i18n/translate.pipe';
+import { hasSeenStartupNotice, markStartupNoticeAsSeen } from './startup-notice.storage';
 
 @Component({
   selector: 'app-server-startup-notice',
@@ -11,7 +12,11 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
   styleUrl: './server-startup-notice.component.css',
 })
 export class ServerStartupNoticeComponent {
-  visible = true;
+  visible = !hasSeenStartupNotice(localStorage);
+
+  constructor() {
+    if (this.visible) markStartupNoticeAsSeen(localStorage);
+  }
 
   dismiss(): void {
     this.visible = false;

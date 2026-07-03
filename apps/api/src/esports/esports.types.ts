@@ -37,9 +37,3 @@ export interface CreatePredictionDto {
   matchId: string;
   score: [number, number];
 }
-
-export interface LeaderboardEntry {
-  playerName: string;
-  points: number;
-  predictions: number;
-}

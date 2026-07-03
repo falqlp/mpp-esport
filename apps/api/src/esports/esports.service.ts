@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Match as StoredMatch, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
-import { CreatePredictionDto, LeaderboardEntry, LolMatch, Prediction, Team } from './esports.types';
+import { CreatePredictionDto, LolMatch, Prediction, Team } from './esports.types';
+import { predictionPoints } from './scoring';
 
 @Injectable()
 export class EsportsService {
@@ -67,33 +68,16 @@ export class EsportsService {
     return this.toPrediction(prediction);
   }
 
-  async getLeaderboard(): Promise<LeaderboardEntry[]> {
-    const startedAt = Date.now();
-    this.logger.log('Calcul du classement…');
-    const board = new Map<string, LeaderboardEntry>();
-    const predictions = await this.getPredictions();
-    for (const prediction of predictions) {
-      const current = board.get(prediction.playerName) ?? {
-        playerName: prediction.playerName,
-        points: 0,
-        predictions: 0,
-      };
-      current.points += prediction.points;
-      current.predictions += 1;
-      board.set(prediction.playerName, current);
-    }
-    const leaderboard = [...board.values()].sort((a, b) => b.points - a.points);
-    this.logger.log(`Classement de ${leaderboard.length} joueurs calculé en ${Date.now() - startedAt}ms`);
-    return leaderboard;
-  }
-
   private computePoints(match: LolMatch, prediction: CreatePredictionDto): number {
     if (!match.result) return 0;
     const predictedWinnerId = this.winnerFromScore(match, prediction.score);
-    const winnerPoints = match.result.winnerId === predictedWinnerId ? 3 : 0;
-    const scorePoints =
-      match.result.score[0] === prediction.score[0] && match.result.score[1] === prediction.score[1] ? 2 : 0;
-    return winnerPoints + scorePoints;
+    return predictionPoints(
+      match.format,
+      predictedWinnerId,
+      prediction.score,
+      match.result.winnerId,
+      match.result.score,
+    );
   }
 
   private validateScore(match: LolMatch, prediction: CreatePredictionDto): void {

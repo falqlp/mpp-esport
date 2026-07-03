@@ -7,7 +7,7 @@ import { AuthUser } from '../../../services/auth.service';
 import { I18nService, LANGUAGES, Language, TranslationKey } from '../../i18n/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 
-export type AppTab = 'predictions' | 'results' | 'leaderboard' | 'profile';
+export type AppTab = 'predictions' | 'results' | 'groups' | 'profile';
 
 @Component({
   selector: 'app-header',
@@ -26,7 +26,7 @@ export class AppHeaderComponent {
   readonly tabs: Array<{ value: AppTab; label: TranslationKey }> = [
     { value: 'predictions', label: 'nav.predictions' },
     { value: 'results', label: 'nav.results' },
-    { value: 'leaderboard', label: 'nav.leaderboard' },
+    { value: 'groups', label: 'nav.groups' },
     { value: 'profile', label: 'nav.profile' },
   ];
   setLanguage(language: Language): void {

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { LolMatch } from './esports.types';
 import { PandaScoreService } from './pandascore.service';
+import { predictionPoints } from './scoring';
 
 export interface MatchSyncResult {
   matchesSynced: number;
@@ -136,9 +137,13 @@ export class MatchSyncService {
       const predictions = await this.prisma.prediction.findMany({ where: { matchId: match.id } });
       for (const prediction of predictions) {
         const predictedWinnerId = prediction.scoreA > prediction.scoreB ? match.teams[0].id : match.teams[1].id;
-        const points =
-          (predictedWinnerId === match.result.winnerId ? 3 : 0) +
-          (prediction.scoreA === match.result.score[0] && prediction.scoreB === match.result.score[1] ? 2 : 0);
+        const points = predictionPoints(
+          match.format,
+          predictedWinnerId,
+          [prediction.scoreA, prediction.scoreB],
+          match.result.winnerId,
+          match.result.score,
+        );
         await this.prisma.prediction.update({ where: { id: prediction.id }, data: { points } });
         count += 1;
       }

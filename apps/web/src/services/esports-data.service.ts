@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, catchError, forkJoin, map, of, shareReplay, startWith, switchMap, timeout } from 'rxjs';
-import { EsportsApiService, LeaderboardEntry, LolMatch, Prediction } from './esports-api.service';
+import { EsportsApiService, LolMatch, Prediction } from './esports-api.service';
 import { I18nService } from '../app/i18n/i18n.service';
 
 export interface EsportsData {
   matches: LolMatch[];
   upcomingMatches: LolMatch[];
   finishedMatches: LolMatch[];
-  leaderboard: LeaderboardEntry[];
   predictions: Prediction[];
 }
 
@@ -20,7 +19,6 @@ const EMPTY_DATA: EsportsData = {
   matches: [],
   upcomingMatches: [],
   finishedMatches: [],
-  leaderboard: [],
   predictions: [],
 };
 
@@ -36,21 +34,14 @@ export class EsportsDataService {
     switchMap(() =>
       this.api.syncMatches().pipe(
         catchError(() => of(null)),
-        switchMap(() =>
-          forkJoin({
-            matches: this.api.getMatches(),
-            leaderboard: this.api.getLeaderboard(),
-            predictions: this.api.getPredictions(),
-          }),
-        ),
+        switchMap(() => forkJoin({ matches: this.api.getMatches(), predictions: this.api.getPredictions() })),
         timeout(API_STARTUP_TIMEOUT_MS),
-        map(({ matches, leaderboard, predictions }): EsportsDataState => ({
+        map(({ matches, predictions }): EsportsDataState => ({
           status: 'ready',
           data: {
             matches,
             upcomingMatches: matches.filter(({ status }) => status === 'upcoming'),
             finishedMatches: matches.filter(({ status }) => status === 'finished'),
-            leaderboard,
             predictions,
           },
         })),

@@ -31,7 +31,7 @@ describe('MatchSyncService', () => {
     const panda = { getMatches: vi.fn().mockResolvedValue([finished]) };
     const result = await new MatchSyncService(prisma as never, panda as never).sync();
     expect(result).toEqual(expect.objectContaining({ matchesSynced: 1, resultsSynced: 1, predictionsRecalculated: 1 }));
-    expect(prisma.prediction.update).toHaveBeenCalledWith({ where: { id: 'p' }, data: { points: 5 } });
+    expect(prisma.prediction.update).toHaveBeenCalledWith({ where: { id: 'p' }, data: { points: 2 } });
     expect(prisma.syncRequest.upsert).toHaveBeenCalledWith(
       expect.objectContaining({ create: { id: 'pandascore', requestedAt: new Date('2026-01-01T12:00:00Z') } }),
     );

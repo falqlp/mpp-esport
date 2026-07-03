@@ -6,7 +6,7 @@ import { AuthService } from '../services/auth.service';
 import { EsportsDataService } from '../services/esports-data.service';
 import { AppHeaderComponent, AppTab } from './components/app-header/app-header.component';
 import { AuthPageComponent } from './components/auth-page/auth-page.component';
-import { LeaderboardTabComponent } from './components/leaderboard-tab/leaderboard-tab.component';
+import { GroupsTabComponent } from './components/groups-tab/groups-tab.component';
 import { PredictionsTabComponent } from './components/predictions-tab/predictions-tab.component';
 import { ProfileTabComponent } from './components/profile-tab/profile-tab.component';
 import { ResultsTabComponent } from './components/results-tab/results-tab.component';
@@ -22,7 +22,7 @@ import { TranslatePipe } from './i18n/translate.pipe';
     MatCardModule,
     AppHeaderComponent,
     AuthPageComponent,
-    LeaderboardTabComponent,
+    GroupsTabComponent,
     PredictionsTabComponent,
     ProfileTabComponent,
     ResultsTabComponent,

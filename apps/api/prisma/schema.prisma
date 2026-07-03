@@ -15,6 +15,8 @@ model User {
   favoriteCompetitions String[] @default([])
   createdAt    DateTime @default(now())
   predictions  Prediction[]
+  ownedGroups  Group[] @relation("GroupOwner")
+  groupMemberships GroupMembership[]
 
   @@map("users")
 }
@@ -54,6 +56,36 @@ model Match {
 
   @@index([status, startsAt])
   @@map("matches")
+}
+
+model Group {
+  id             String   @id @default(cuid())
+  name           String
+  league         String
+  tournament     String
+  isPublic       Boolean  @default(false)
+  invitationCode String   @unique
+  ownerId        String
+  createdAt      DateTime @default(now())
+  owner          User     @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  memberships    GroupMembership[]
+
+  @@index([isPublic, name])
+  @@index([ownerId])
+  @@index([league, tournament])
+  @@map("groups")
+}
+
+model GroupMembership {
+  groupId  String
+  userId   String
+  joinedAt DateTime @default(now())
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@index([userId])
+  @@map("group_memberships")
 }
 
 model SyncRequest {

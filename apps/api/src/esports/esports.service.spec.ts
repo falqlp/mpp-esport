@@ -82,32 +82,4 @@ describe('EsportsService', () => {
     );
     expect(result.playerName).toBe('Leo');
   });
-  it('aggregates and sorts the leaderboard', async () => {
-    const { service, prisma } = setup();
-    prisma.prediction.findMany.mockResolvedValue([
-      {
-        id: '1',
-        matchId: 'm',
-        userId: 'u1',
-        user: { displayName: 'A' },
-        winnerId: 'x',
-        scoreA: 1,
-        scoreB: 0,
-        createdAt: new Date(),
-        points: 3,
-      },
-      {
-        id: '2',
-        matchId: 'm',
-        userId: 'u2',
-        user: { displayName: 'B' },
-        winnerId: 'x',
-        scoreA: 1,
-        scoreB: 0,
-        createdAt: new Date(),
-        points: 5,
-      },
-    ]);
-    expect((await service.getLeaderboard()).map((x) => x.playerName)).toEqual(['B', 'A']);
-  });
 });
