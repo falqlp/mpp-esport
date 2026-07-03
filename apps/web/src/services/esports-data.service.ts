@@ -23,6 +23,8 @@ const EMPTY_DATA: EsportsData = {
   predictions: [],
 };
 
+const API_STARTUP_TIMEOUT_MS = 120_000;
+
 @Injectable({ providedIn: 'root' })
 export class EsportsDataService {
   private readonly api = inject(EsportsApiService);
@@ -39,7 +41,7 @@ export class EsportsDataService {
             predictions: this.api.getPredictions(),
           }),
         ),
-        timeout(15_000),
+        timeout(API_STARTUP_TIMEOUT_MS),
         map(({ matches, leaderboard, predictions }): EsportsDataState => ({
           status: 'ready',
           data: {
@@ -54,7 +56,8 @@ export class EsportsDataService {
           of<EsportsDataState>({
             status: 'error',
             data: EMPTY_DATA,
-            message: "Impossible de charger les données. Vérifie que l'API est lancée, puis réessaie.",
+            message:
+              'Impossible de charger les données. Le serveur gratuit peut prendre une minute à redémarrer ; réessaie dans quelques instants.',
           }),
         ),
         startWith<EsportsDataState>({ status: 'loading', data: EMPTY_DATA }),
