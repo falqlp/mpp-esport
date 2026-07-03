@@ -26,7 +26,12 @@ export class AuthService {
     if (await this.prisma.user.findUnique({ where: { email } }))
       throw new BadRequestException('Cette adresse email est déjà utilisée');
     const user = await this.prisma.user.create({
-      data: { email, displayName, passwordHash: await this.hashPassword(password) },
+      data: {
+        email,
+        displayName,
+        passwordHash: await this.hashPassword(password),
+        favoriteCompetitions: [...COMPETITION_KEYS],
+      },
     });
     return this.session(user);
   }

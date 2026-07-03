@@ -1,6 +1,6 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { AuthService } from './auth.service';
+import { AuthService, COMPETITION_KEYS } from './auth.service';
 
 const user = {
   id: 'u1',
@@ -18,10 +18,15 @@ describe('AuthService', () => {
   it('registers, normalizes email and never exposes the password hash', async () => {
     const { service, prisma } = setup();
     prisma.user.findUnique.mockResolvedValue(null);
-    prisma.user.create.mockImplementation(async ({ data }) => ({ ...user, ...data, favoriteCompetitions: [] }));
+    prisma.user.create.mockImplementation(async ({ data }) => ({ ...user, ...data }));
     const session = await service.register({ email: ' A@B.COM ', displayName: 'Leo', password: 'password1' });
     expect(prisma.user.create).toHaveBeenCalled();
-    expect(session.user).toEqual(expect.objectContaining({ email: 'a@b.com', favoriteCompetitions: [] }));
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ favoriteCompetitions: [...COMPETITION_KEYS] }) }),
+    );
+    expect(session.user).toEqual(
+      expect.objectContaining({ email: 'a@b.com', favoriteCompetitions: [...COMPETITION_KEYS] }),
+    );
     expect(session.user).not.toHaveProperty('passwordHash');
   });
   it('rejects invalid registration and duplicate emails', async () => {
