@@ -1,0 +1,85 @@
+.results-page,
+.matches {
+  display: grid;
+  gap: 16px;
+}
+.filter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+}
+.filter mat-form-field {
+  max-width: 420px;
+  width: 100%;
+}
+mat-card-header {
+  margin-bottom: 16px;
+}
+.result-row {
+  align-items: center;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 14px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1.1fr 1fr 1fr auto auto;
+  padding: 14px;
+}
+.competition-info,
+.my-prediction {
+  display: grid;
+}
+.competition,
+.result-teams {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.competition img {
+  height: 24px;
+  object-fit: contain;
+  width: 24px;
+}
+.result-teams {
+  justify-content: center;
+}
+.result-teams img {
+  height: 34px;
+  object-fit: contain;
+  width: 40px;
+}
+small,
+time,
+.no-prediction {
+  color: var(--mat-sys-on-surface-variant);
+}
+.points {
+  border-radius: 999px;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+.points.won {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+@media (max-width: 900px) {
+  .result-row {
+    grid-template-columns: 1fr auto;
+  }
+  .result-teams,
+  .my-prediction {
+    justify-content: flex-start;
+  }
+  .result-teams,
+  .my-prediction,
+  time {
+    grid-column: 1;
+  }
+  .points {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .no-prediction {
+    grid-column: 1;
+  }
+}

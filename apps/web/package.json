@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "start": "ng serve --host 0.0.0.0 --port 4200",
-    "build": "ng build"
+    "start": "node ../../node_modules/@angular/cli/bin/ng.js serve --host 0.0.0.0 --port 4200",
+    "build": "node ../../node_modules/@angular/cli/bin/ng.js build"
   },
   "dependencies": {
     "@angular/cdk": "22.0.2",

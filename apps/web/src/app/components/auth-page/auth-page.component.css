@@ -1,0 +1,15 @@
+mat-card {
+  margin: clamp(48px, 10vh, 110px) auto 0;
+  max-width: 520px;
+  padding: 18px;
+}
+mat-card-header {
+  margin-bottom: 12px;
+}
+form {
+  display: grid;
+  gap: 4px;
+}
+mat-form-field {
+  width: 100%;
+}

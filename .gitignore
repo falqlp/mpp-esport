@@ -3,6 +3,10 @@ coverage/
 apps/api/coverage/
 dist/
 .angular/
+apps/web/out-tsc/
 apps/api/.env
 .env.local
 npm-debug.log*
+.idea/*
+!.idea/runConfigurations/
+!.idea/runConfigurations/*.xml

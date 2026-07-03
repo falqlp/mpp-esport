@@ -11,12 +11,6 @@ import { AuthService } from './auth/auth.service';
 @Module({
   imports: [ScheduleModule.forRoot()],
   controllers: [AuthController, EsportsController],
-  providers: [
-    EsportsService,
-    MatchSyncService,
-    PandaScoreService,
-    PrismaService,
-    AuthService,
-  ],
+  providers: [EsportsService, MatchSyncService, PandaScoreService, PrismaService, AuthService],
 })
 export class AppModule {}

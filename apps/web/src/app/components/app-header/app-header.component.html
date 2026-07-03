@@ -1,0 +1,22 @@
+<mat-toolbar class="topbar">
+  <div class="brand">
+    <span>League of Legends</span>
+    <h1>MPP Esport</h1>
+  </div>
+  @if (user) {
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" aria-label="Navigation principale">
+      @for (tab of tabs; track tab.value) {
+        <button mat-tab-link type="button" [active]="activeTab === tab.value" (click)="tabChange.emit(tab.value)">
+          {{ tab.label }}
+        </button>
+      }
+    </nav>
+    <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+    <div class="account">
+      <span
+        ><strong>{{ user.displayName }}</strong
+        ><small>{{ user.email }}</small></span
+      ><button mat-stroked-button type="button" (click)="logout.emit()">Se déconnecter</button>
+    </div>
+  }
+</mat-toolbar>

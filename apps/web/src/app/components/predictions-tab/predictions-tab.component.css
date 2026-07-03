@@ -1,0 +1,137 @@
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1.35fr 0.95fr;
+}
+.filter {
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  padding: 12px 16px;
+}
+.filter mat-form-field {
+  max-width: 420px;
+  width: 100%;
+}
+mat-card-header {
+  margin-bottom: 16px;
+}
+.matches {
+  display: grid;
+  gap: 10px;
+  max-height: 540px;
+  overflow: auto;
+}
+.match-row {
+  align-items: center;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 14px;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 16px;
+  grid-template-columns: 1.1fr 1fr auto;
+  min-height: 96px;
+  padding: 14px;
+  text-align: left;
+  width: 100%;
+}
+.match-row:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.league {
+  align-content: center;
+  display: grid;
+  gap: 2px;
+}
+.competition,
+.teams {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.competition img {
+  height: 24px;
+  object-fit: contain;
+  width: 24px;
+}
+.live-badge {
+  background: var(--mat-sys-error);
+  border-radius: 999px;
+  color: var(--mat-sys-on-error);
+  font-size: 10px;
+  padding: 4px 7px;
+}
+.league small,
+time {
+  color: var(--mat-sys-on-surface-variant);
+}
+em {
+  background: var(--mat-sys-primary-container);
+  border-radius: 999px;
+  color: var(--mat-sys-on-primary-container);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  margin-top: 6px;
+  padding: 4px 8px;
+  width: fit-content;
+}
+.teams {
+  justify-content: center;
+}
+.team-logo {
+  align-items: center;
+  background: var(--mat-sys-surface);
+  border-radius: 10px;
+  display: flex;
+  height: 46px;
+  justify-content: center;
+  width: 56px;
+}
+.team-logo img {
+  height: 38px;
+  object-fit: contain;
+  width: 46px;
+}
+form {
+  display: grid;
+  gap: 4px;
+}
+mat-form-field {
+  width: 100%;
+}
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .filter {
+    grid-row: 1;
+  }
+  .ticket {
+    grid-row: 2;
+  }
+  .list {
+    grid-row: 3;
+  }
+  .match-row {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .teams {
+    justify-content: flex-start;
+  }
+  .matches {
+    max-height: none;
+    overflow: visible;
+  }
+}

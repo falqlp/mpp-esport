@@ -120,14 +120,18 @@ export class PandaScoreService {
         headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
       });
     } catch (error) {
-      this.logger.error(`<-- PandaScore GET ${path} échec après ${Date.now() - startedAt}ms`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `<-- PandaScore GET ${path} échec après ${Date.now() - startedAt}ms`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw new ServiceUnavailableException('PandaScore API is unreachable');
     }
 
     if (!response.ok) {
-      const message = response.status === 429
-        ? 'PandaScore rate limit reached; retry after the quota resets'
-        : `PandaScore API returned ${response.status}`;
+      const message =
+        response.status === 429
+          ? 'PandaScore rate limit reached; retry after the quota resets'
+          : `PandaScore API returned ${response.status}`;
       this.logger.warn(`${message} for ${path}`);
       throw new ServiceUnavailableException(message);
     }

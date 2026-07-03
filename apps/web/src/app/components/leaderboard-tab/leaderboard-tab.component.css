@@ -1,0 +1,17 @@
+mat-card-header {
+  margin-bottom: 16px;
+}
+mat-list-item {
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+.rank {
+  align-items: center;
+  background: var(--mat-sys-primary);
+  border-radius: 10px;
+  color: var(--mat-sys-on-primary);
+  display: inline-flex;
+  font-weight: 900;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}

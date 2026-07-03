@@ -1,0 +1,96 @@
+<section class="grid">
+  <mat-card appearance="outlined" class="filter">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Compétition</mat-label>
+      <mat-select [formControl]="filter">
+        <mat-option value="favorites">Mes compétitions suivies</mat-option>
+        @for (competition of competitions; track competition.value) {
+          <mat-option [value]="competition.value">{{ competition.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="list">
+    <mat-card-header
+      ><mat-card-title-group
+        ><mat-card-subtitle>À venir</mat-card-subtitle><mat-card-title>Matchs ouverts aux pronos</mat-card-title
+        ><mat-chip>{{ filtered().length }} matchs</mat-chip></mat-card-title-group
+      ></mat-card-header
+    >
+    <mat-card-content class="matches">
+      @for (match of filtered(); track match.id) {
+        <button class="match-row" type="button" [disabled]="match.status === 'live'" (click)="select(match)">
+          <span class="league">
+            <span class="competition">
+              @if (match.leagueLogoUrl) {
+                <img [src]="match.leagueLogoUrl" [alt]="match.league" />
+              }
+              <strong>{{ match.league }}</strong>
+              @if (match.status === 'live') {
+                <b class="live-badge">LIVE</b>
+              }
+            </span>
+            <small>{{ match.tournament }} · {{ match.format }}</small>
+            @if (prediction(match.id); as saved) {
+              <em
+                >Mon prono : {{ match.teams[0].code }} {{ saved.score[0] }} – {{ saved.score[1] }}
+                {{ match.teams[1].code }}</em
+              >
+            }
+          </span>
+          <span class="teams">
+            <span class="team-logo">
+              @if (match.teams[0].logoUrl) {
+                <img [src]="match.teams[0].logoUrl" [alt]="match.teams[0].name" />
+              } @else {
+                <b>{{ match.teams[0].code }}</b>
+              }
+            </span>
+            <small>VS</small>
+            <span class="team-logo">
+              @if (match.teams[1].logoUrl) {
+                <img [src]="match.teams[1].logoUrl" [alt]="match.teams[1].name" />
+              } @else {
+                <b>{{ match.teams[1].code }}</b>
+              }
+            </span>
+          </span>
+          <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' }}</time>
+        </button>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="ticket">
+    <mat-card-header
+      ><mat-card-subtitle>Prono</mat-card-subtitle><mat-card-title>Ton ticket</mat-card-title></mat-card-header
+    >
+    <mat-card-content
+      ><form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline"
+          ><mat-label>Match</mat-label
+          ><mat-select formControlName="matchId" (selectionChange)="loadPrediction($event.value)"
+            ><mat-option value="">Choisir un match</mat-option>
+            @for (match of openMatches(); track match.id) {
+              <mat-option [value]="match.id">{{ match.teams[0].code }} vs {{ match.teams[1].code }}</mat-option>
+            }
+          </mat-select></mat-form-field
+        >
+        @if (selectedMatch(); as match) {
+          <mat-form-field appearance="outline"
+            ><mat-label>{{ match.teams[0].name }}</mat-label
+            ><input matInput type="number" min="0" [max]="wins(match)" formControlName="scoreA"
+          /></mat-form-field>
+          <mat-form-field appearance="outline"
+            ><mat-label>{{ match.teams[1].name }}</mat-label
+            ><input matInput type="number" min="0" [max]="wins(match)" formControlName="scoreB"
+          /></mat-form-field>
+        }
+        <button mat-flat-button type="submit" [disabled]="saving">
+          {{ saving ? 'Enregistrement…' : 'Valider le prono' }}
+        </button>
+      </form></mat-card-content
+    >
+  </mat-card>
+</section>

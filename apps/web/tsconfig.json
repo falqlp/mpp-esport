@@ -18,14 +18,9 @@
     "module": "ES2022",
     "useDefineForClassFields": false,
     "paths": {
-      "@angular/core/primitives/di": [
-        "../../node_modules/@angular/core/types/primitives-di.d.ts"
-      ]
+      "@angular/core/primitives/di": ["../../node_modules/@angular/core/types/primitives-di.d.ts"]
     },
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
+    "lib": ["ES2022", "dom"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

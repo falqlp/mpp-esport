@@ -21,13 +21,16 @@
     "test:api": "yarn workspace @mpp-esport/api test",
     "test:api:coverage": "yarn workspace @mpp-esport/api test:coverage",
     "lint": "node node_modules/eslint/bin/eslint.js \"apps/**/*.{ts,html}\"",
-    "lint:fix": "yarn lint --fix"
+    "lint:fix": "yarn lint --fix",
+    "format": "node node_modules/prettier/bin/prettier.cjs --write .",
+    "format:check": "node node_modules/prettier/bin/prettier.cjs --check ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "angular-eslint": "^22.0.0",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
+    "prettier": "^3.9.4",
     "typescript-eslint": "^8.62.1"
   }
 }

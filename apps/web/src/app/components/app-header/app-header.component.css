@@ -1,0 +1,76 @@
+.topbar {
+  background: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 18px;
+  gap: 24px;
+  height: auto;
+  margin-bottom: 18px;
+  min-height: 76px;
+  padding: 10px 16px;
+  position: sticky;
+  top: 10px;
+  z-index: 20;
+}
+.brand {
+  display: grid;
+  gap: 2px;
+}
+.brand span {
+  color: var(--mat-sys-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+h1 {
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -1px;
+  line-height: 0.95;
+  margin: 0;
+  white-space: nowrap;
+}
+nav {
+  background: transparent;
+  border: 0;
+  margin-left: auto;
+  max-width: 650px;
+  overflow-x: auto;
+}
+.account {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+.account span {
+  display: grid;
+  line-height: 1.2;
+  text-align: right;
+}
+.account small {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 11px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 680px) {
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    top: 4px;
+  }
+  nav {
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  .account {
+    justify-content: space-between;
+  }
+  .account span {
+    text-align: left;
+  }
+}

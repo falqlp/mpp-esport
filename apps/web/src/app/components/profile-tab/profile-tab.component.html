@@ -1,0 +1,28 @@
+<mat-card appearance="outlined"
+  ><mat-card-header
+    ><mat-card-subtitle>Mon profil</mat-card-subtitle
+    ><mat-card-title>Compétitions suivies</mat-card-title></mat-card-header
+  ><mat-card-content
+    ><p>Une compétition régionale inclut automatiquement tous ses splits et playoffs.</p>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+      ><mat-label>Rechercher une compétition</mat-label
+      ><input matInput type="search" [formControl]="search" placeholder="LEC, LCK, Worlds…"
+    /></mat-form-field>
+    <div class="checklist">
+      @for (competition of filteredOptions(); track competition.value) {
+        <mat-checkbox
+          [checked]="selected.value.includes(competition.value)"
+          (change)="toggle(competition.value, $event.checked)"
+          >{{ competition.label }}</mat-checkbox
+        >
+      } @empty {
+        <p>Aucune compétition trouvée.</p>
+      }
+    </div>
+    <div class="actions">
+      <button mat-flat-button type="button" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+      </button>
+    </div></mat-card-content
+  ></mat-card
+>

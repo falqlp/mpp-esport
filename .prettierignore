@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+.angular/
+apps/api/coverage/
+apps/web/out-tsc/
+yarn.lock

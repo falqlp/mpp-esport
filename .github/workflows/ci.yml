@@ -37,6 +37,9 @@ jobs:
       - name: Run ESLint
         run: yarn lint
 
+      - name: Check formatting
+        run: yarn format:check
+
       - name: Test API
         run: yarn test:api
 

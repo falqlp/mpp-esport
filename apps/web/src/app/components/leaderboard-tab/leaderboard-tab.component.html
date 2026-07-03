@@ -1,0 +1,15 @@
+<mat-card appearance="outlined"
+  ><mat-card-header
+    ><mat-card-subtitle>Classement</mat-card-subtitle><mat-card-title>Joueurs</mat-card-title></mat-card-header
+  ><mat-card-content
+    ><mat-list>
+      @for (player of leaderboard; track player.playerName; let index = $index) {
+        <mat-list-item
+          ><span matListItemIcon class="rank">{{ index + 1 }}</span
+          ><strong matListItemTitle>{{ player.playerName }}</strong
+          ><span matListItemMeta>{{ player.points }} pts</span></mat-list-item
+        >
+      }
+    </mat-list></mat-card-content
+  ></mat-card
+>

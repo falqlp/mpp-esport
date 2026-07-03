@@ -3,8 +3,16 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 export type CompetitionKey = 'LEC' | 'LCK' | 'LCS' | 'LPL' | 'MSI' | 'FIRST_STAND' | 'WORLDS';
-export interface AuthUser { id: string; email: string; displayName: string; favoriteCompetitions: CompetitionKey[] }
-interface AuthSession { token: string; user: AuthUser }
+export interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string;
+  favoriteCompetitions: CompetitionKey[];
+}
+interface AuthSession {
+  token: string;
+  user: AuthUser;
+}
 const TOKEN_KEY = 'mpp-auth-token';
 const USER_KEY = 'mpp-auth-user';
 
@@ -20,15 +28,18 @@ export class AuthService {
   readonly user$ = this.userSubject.asObservable();
 
   login(email: string, password: string): Observable<AuthSession> {
-    return this.http.post<AuthSession>('http://localhost:3000/api/auth/login', { email, password })
+    return this.http
+      .post<AuthSession>('http://localhost:3000/api/auth/login', { email, password })
       .pipe(tap((session) => this.save(session)));
   }
   register(email: string, displayName: string, password: string): Observable<AuthSession> {
-    return this.http.post<AuthSession>('http://localhost:3000/api/auth/register', { email, displayName, password })
+    return this.http
+      .post<AuthSession>('http://localhost:3000/api/auth/register', { email, displayName, password })
       .pipe(tap((session) => this.save(session)));
   }
   updateFavoriteCompetitions(favoriteCompetitions: CompetitionKey[]): Observable<AuthUser> {
-    return this.http.put<AuthUser>('http://localhost:3000/api/auth/me/favorite-competitions', { favoriteCompetitions })
+    return this.http
+      .put<AuthUser>('http://localhost:3000/api/auth/me/favorite-competitions', { favoriteCompetitions })
       .pipe(tap((user) => this.saveUser(user)));
   }
   logout(): void {
@@ -49,7 +60,8 @@ export class AuthService {
     try {
       const user = JSON.parse(localStorage.getItem(USER_KEY) ?? 'null') as AuthUser | null;
       return user ? { ...user, favoriteCompetitions: user.favoriteCompetitions ?? [] } : null;
+    } catch {
+      return null;
     }
-    catch { return null; }
   }
 }

@@ -2,14 +2,42 @@
   @if (user$ | async; as user) {
     <app-header [user]="user" [activeTab]="activeTab" (tabChange)="activeTab = $event" (logout)="logout()" />
     @if (state$ | async; as state) {
-      @if (state.status === 'loading') { <mat-card appearance="outlined" class="status"><mat-card-content>Chargement des données esport…</mat-card-content></mat-card> }
-      @if (state.status === 'error') { <mat-card appearance="outlined" class="error"><mat-card-content>{{ state.message }} <button mat-stroked-button type="button" (click)="reload()">Réessayer</button></mat-card-content></mat-card> }
+      @if (state.status === 'loading') {
+        <mat-card appearance="outlined" class="status"
+          ><mat-card-content>Chargement des données esport…</mat-card-content></mat-card
+        >
+      }
+      @if (state.status === 'error') {
+        <mat-card appearance="outlined" class="error"
+          ><mat-card-content
+            >{{ state.message }}
+            <button mat-stroked-button type="button" (click)="reload()">Réessayer</button></mat-card-content
+          ></mat-card
+        >
+      }
       @if (state.status === 'ready') {
         @switch (activeTab) {
-          @case ('predictions') { <app-predictions-tab [matches]="state.data.matches" [predictions]="state.data.predictions" [user]="user" (changed)="reload()" /> }
-          @case ('results') { <app-results-tab [matches]="state.data.finishedMatches" [favorites]="user.favoriteCompetitions" /> }
-          @case ('leaderboard') { <app-leaderboard-tab [leaderboard]="state.data.leaderboard" /> }
-          @case ('profile') { <app-profile-tab [user]="user" (saved)="reload()" /> }
+          @case ('predictions') {
+            <app-predictions-tab
+              [matches]="state.data.matches"
+              [predictions]="state.data.predictions"
+              [user]="user"
+              (changed)="reload()"
+            />
+          }
+          @case ('results') {
+            <app-results-tab
+              [matches]="state.data.finishedMatches"
+              [predictions]="state.data.predictions"
+              [favorites]="user.favoriteCompetitions"
+            />
+          }
+          @case ('leaderboard') {
+            <app-leaderboard-tab [leaderboard]="state.data.leaderboard" />
+          }
+          @case ('profile') {
+            <app-profile-tab [user]="user" (saved)="reload()" />
+          }
         }
       }
     }

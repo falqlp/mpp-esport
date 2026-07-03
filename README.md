@@ -118,6 +118,13 @@ Pour appliquer automatiquement les corrections disponibles :
 yarn lint:fix
 ```
 
+Formate automatiquement le TypeScript, les templates Angular, les styles et les fichiers de configuration avec Prettier :
+
+```bash
+yarn format
+yarn format:check
+```
+
 La GitHub Action `.github/workflows/ci.yml` exécute automatiquement l'installation, le lint et les builds API/web sur chaque pull request et sur les pushes vers `main`.
 
 Les tests backend suivent un workflow TDD et se lancent avec :

@@ -34,7 +34,7 @@ export class EsportsService {
     const storedMatch = await this.prisma.match.findUnique({ where: { id: dto.matchId } });
     if (!storedMatch) throw new NotFoundException('Match not found');
     const match = this.toLolMatch(storedMatch);
-    if (match.status !== 'upcoming') {
+    if (match.status !== 'upcoming' || storedMatch.startsAt.getTime() <= Date.now()) {
       throw new BadRequestException('Predictions are closed for this match');
     }
 
@@ -96,8 +96,12 @@ export class EsportsService {
     const [scoreA, scoreB] = prediction.score;
     const winsRequired = match.format === 'BO1' ? 1 : match.format === 'BO3' ? 2 : 3;
     if (
-      !Number.isInteger(scoreA) || !Number.isInteger(scoreB) || scoreA < 0 || scoreB < 0 ||
-      scoreA > winsRequired || scoreB > winsRequired
+      !Number.isInteger(scoreA) ||
+      !Number.isInteger(scoreB) ||
+      scoreA < 0 ||
+      scoreB < 0 ||
+      scoreA > winsRequired ||
+      scoreB > winsRequired
     ) {
       throw new BadRequestException(`Scores must be between 0 and ${winsRequired} for a ${match.format}`);
     }
