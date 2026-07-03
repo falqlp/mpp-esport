@@ -1,17 +1,20 @@
 <main class="shell">
+  <app-server-startup-notice />
   @if (user$ | async; as user) {
     <app-header [user]="user" [activeTab]="activeTab" (tabChange)="activeTab = $event" (logout)="logout()" />
     @if (state$ | async; as state) {
       @if (state.status === 'loading') {
         <mat-card appearance="outlined" class="status"
-          ><mat-card-content>Chargement des données esport…</mat-card-content></mat-card
+          ><mat-card-content>{{ 'app.loading' | translate }}</mat-card-content></mat-card
         >
       }
       @if (state.status === 'error') {
         <mat-card appearance="outlined" class="error"
           ><mat-card-content
-            >{{ state.message }}
-            <button mat-stroked-button type="button" (click)="reload()">Réessayer</button></mat-card-content
+            >{{ 'data.error' | translate }}
+            <button mat-stroked-button type="button" (click)="reload()">
+              {{ 'common.retry' | translate }}
+            </button></mat-card-content
           ></mat-card
         >
       }

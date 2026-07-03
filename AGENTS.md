@@ -13,6 +13,14 @@
 - Préférer des entrées/sorties explicites entre composants et éviter les dépendances implicites au composant racine.
 - Avant de terminer une évolution UI, vérifier que le composant modifié reste lisible et n'accumule pas une nouvelle responsabilité indépendante.
 
+## Internationalisation
+
+- Tout texte visible par l'utilisateur doit toujours être traduit en anglais, français, espagnol, portugais, allemand et italien.
+- Ne jamais ajouter de texte d'interface en dur dans un composant ou un template ; utiliser le service et le pipe de traduction existants.
+- Toute nouvelle clé de traduction doit être renseignée dans les six langues avant de terminer la modification.
+- Les dates, nombres, messages d'erreur, notifications et libellés d'accessibilité doivent respecter la langue sélectionnée.
+- Conserver la détection initiale de la langue du navigateur et le repli sur l'anglais lorsqu'elle n'est pas prise en charge.
+
 ## Validation
 
 - Travailler en TDD pour toute nouvelle logique : écrire d'abord un test qui échoue, implémenter le minimum nécessaire, puis refactorer avec les tests au vert.

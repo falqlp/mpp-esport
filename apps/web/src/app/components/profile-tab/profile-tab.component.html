@@ -1,11 +1,11 @@
 <mat-card appearance="outlined"
   ><mat-card-header
-    ><mat-card-subtitle>Mon profil</mat-card-subtitle
-    ><mat-card-title>Compétitions suivies</mat-card-title></mat-card-header
+    ><mat-card-subtitle>{{ 'profile.mine' | translate }}</mat-card-subtitle
+    ><mat-card-title>{{ 'profile.followed' | translate }}</mat-card-title></mat-card-header
   ><mat-card-content
-    ><p>Une compétition régionale inclut automatiquement tous ses splits et playoffs.</p>
+    ><p>{{ 'profile.explanation' | translate }}</p>
     <mat-form-field appearance="outline" subscriptSizing="dynamic"
-      ><mat-label>Rechercher une compétition</mat-label
+      ><mat-label>{{ 'profile.search' | translate }}</mat-label
       ><input matInput type="search" [formControl]="search" placeholder="LEC, LCK, Worlds…"
     /></mat-form-field>
     <div class="checklist">
@@ -13,15 +13,15 @@
         <mat-checkbox
           [checked]="selected.value.includes(competition.value)"
           (change)="toggle(competition.value, $event.checked)"
-          >{{ competition.label }}</mat-checkbox
+          >{{ competition.label | translate: { name: competition.value } }}</mat-checkbox
         >
       } @empty {
-        <p>Aucune compétition trouvée.</p>
+        <p>{{ 'profile.empty' | translate }}</p>
       }
     </div>
     <div class="actions">
       <button mat-flat-button type="button" (click)="save()" [disabled]="saving">
-        {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+        {{ (saving ? 'common.saving' : 'common.save') | translate }}
       </button>
     </div></mat-card-content
   ></mat-card

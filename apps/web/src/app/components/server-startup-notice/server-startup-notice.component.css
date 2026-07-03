@@ -1,0 +1,23 @@
+.notice {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  margin-bottom: 16px;
+}
+
+mat-card-content {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+button {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 680px) {
+  mat-card-content {
+    align-items: flex-start;
+  }
+}

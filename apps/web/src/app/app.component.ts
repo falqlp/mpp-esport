@@ -10,6 +10,8 @@ import { LeaderboardTabComponent } from './components/leaderboard-tab/leaderboar
 import { PredictionsTabComponent } from './components/predictions-tab/predictions-tab.component';
 import { ProfileTabComponent } from './components/profile-tab/profile-tab.component';
 import { ResultsTabComponent } from './components/results-tab/results-tab.component';
+import { ServerStartupNoticeComponent } from './components/server-startup-notice/server-startup-notice.component';
+import { TranslatePipe } from './i18n/translate.pipe';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +26,8 @@ import { ResultsTabComponent } from './components/results-tab/results-tab.compon
     PredictionsTabComponent,
     ProfileTabComponent,
     ResultsTabComponent,
+    ServerStartupNoticeComponent,
+    TranslatePipe,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',

@@ -7,11 +7,21 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
+import { I18nService } from '../../i18n/i18n.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-auth-page',
   standalone: true,
-  imports: [ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSnackBarModule],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSnackBarModule,
+    TranslatePipe,
+  ],
   templateUrl: './auth-page.component.html',
   styleUrl: './auth-page.component.css',
 })
@@ -19,6 +29,7 @@ export class AuthPageComponent {
   private readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly i18n = inject(I18nService);
   @Output() readonly authenticated = new EventEmitter<void>();
   mode: 'login' | 'register' = 'login';
   loading = false;
@@ -38,11 +49,15 @@ export class AuthPageComponent {
       this.mode === 'login' ? this.auth.login(email, password) : this.auth.register(email, displayName, password);
     request.pipe(finalize(() => (this.loading = false))).subscribe({
       next: ({ user }) => {
-        this.snackBar.open(`Bienvenue ${user.displayName} !`, 'Fermer', { duration: 3000 });
+        this.snackBar.open(
+          this.i18n.translate('auth.welcome', { name: user.displayName }),
+          this.i18n.translate('common.close'),
+          { duration: 3000 },
+        );
         this.authenticated.emit();
       },
       error: () =>
-        this.snackBar.open('Connexion impossible. Vérifie les informations saisies.', 'Fermer', { duration: 4000 }),
+        this.snackBar.open(this.i18n.translate('auth.error'), this.i18n.translate('common.close'), { duration: 4000 }),
     });
   }
 }

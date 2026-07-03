@@ -4,10 +4,10 @@
     <h1>MPP Esport</h1>
   </div>
   @if (user) {
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel" aria-label="Navigation principale">
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" [attr.aria-label]="'nav.label' | translate">
       @for (tab of tabs; track tab.value) {
         <button mat-tab-link type="button" [active]="activeTab === tab.value" (click)="tabChange.emit(tab.value)">
-          {{ tab.label }}
+          {{ tab.label | translate }}
         </button>
       }
     </nav>
@@ -16,7 +16,17 @@
       <span
         ><strong>{{ user.displayName }}</strong
         ><small>{{ user.email }}</small></span
-      ><button mat-stroked-button type="button" (click)="logout.emit()">Se déconnecter</button>
+      ><button mat-stroked-button type="button" (click)="logout.emit()">{{ 'nav.logout' | translate }}</button>
     </div>
   }
+  <mat-select
+    class="language-select"
+    [value]="i18n.language()"
+    (valueChange)="setLanguage($event)"
+    aria-label="Language"
+  >
+    @for (language of languages; track language) {
+      <mat-option [value]="language">{{ 'language.' + language | translate }}</mat-option>
+    }
+  </mat-select>
 </mat-toolbar>

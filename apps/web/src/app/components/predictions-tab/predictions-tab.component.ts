@@ -20,6 +20,8 @@ import { finalize } from 'rxjs';
 import { AuthUser } from '../../../services/auth.service';
 import { EsportsApiService, LolMatch, Prediction } from '../../../services/esports-api.service';
 import { COMPETITIONS, filterMatches } from '../../competition.utils';
+import { I18nService } from '../../i18n/i18n.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-predictions-tab',
@@ -34,6 +36,7 @@ import { COMPETITIONS, filterMatches } from '../../competition.utils';
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+    TranslatePipe,
   ],
   templateUrl: './predictions-tab.component.html',
   styleUrl: './predictions-tab.component.css',
@@ -42,6 +45,7 @@ export class PredictionsTabComponent {
   private readonly api = inject(EsportsApiService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  readonly i18n = inject(I18nService);
 
   @Input() matches: LolMatch[] = [];
   @Input() predictions: Prediction[] = [];
@@ -117,9 +121,14 @@ export class PredictionsTabComponent {
       .subscribe({
         next: () => {
           this.changed.emit();
-          this.snackBar.open('Pronostic enregistré !', 'Fermer', { duration: 3000 });
+          this.snackBar.open(this.i18n.translate('predictions.saved'), this.i18n.translate('common.close'), {
+            duration: 3000,
+          });
         },
-        error: () => this.snackBar.open("Le pronostic n'a pas pu être enregistré.", 'Fermer', { duration: 4000 }),
+        error: () =>
+          this.snackBar.open(this.i18n.translate('predictions.error'), this.i18n.translate('common.close'), {
+            duration: 4000,
+          }),
       });
   }
 }

@@ -74,3 +74,7 @@ nav {
     text-align: left;
   }
 }
+.language-select {
+  width: 8.5rem;
+  margin-left: auto;
+}

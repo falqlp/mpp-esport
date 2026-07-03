@@ -1,11 +1,13 @@
 <section class="grid">
   <mat-card appearance="outlined" class="filter">
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>Compétition</mat-label>
+      <mat-label>{{ 'common.competition' | translate }}</mat-label>
       <mat-select [formControl]="filter">
-        <mat-option value="favorites">Mes compétitions suivies</mat-option>
+        <mat-option value="favorites">{{ 'common.followedCompetitions' | translate }}</mat-option>
         @for (competition of competitions; track competition.value) {
-          <mat-option [value]="competition.value">{{ competition.label }}</mat-option>
+          <mat-option [value]="competition.value">{{
+            competition.label | translate: { name: competition.value }
+          }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -14,8 +16,9 @@
   <mat-card appearance="outlined" class="list">
     <mat-card-header
       ><mat-card-title-group
-        ><mat-card-subtitle>À venir</mat-card-subtitle><mat-card-title>Matchs ouverts aux pronos</mat-card-title
-        ><mat-chip>{{ filtered().length }} matchs</mat-chip></mat-card-title-group
+        ><mat-card-subtitle>{{ 'predictions.upcoming' | translate }}</mat-card-subtitle
+        ><mat-card-title>{{ 'predictions.openMatches' | translate }}</mat-card-title
+        ><mat-chip>{{ filtered().length }} {{ 'common.matches' | translate }}</mat-chip></mat-card-title-group
       ></mat-card-header
     >
     <mat-card-content class="matches">
@@ -34,8 +37,8 @@
             <small>{{ match.tournament }} · {{ match.format }}</small>
             @if (prediction(match.id); as saved) {
               <em
-                >Mon prono : {{ match.teams[0].code }} {{ saved.score[0] }} – {{ saved.score[1] }}
-                {{ match.teams[1].code }}</em
+                >{{ 'predictions.mine' | translate }} {{ match.teams[0].code }} {{ saved.score[0] }} –
+                {{ saved.score[1] }} {{ match.teams[1].code }}</em
               >
             }
           </span>
@@ -56,7 +59,7 @@
               }
             </span>
           </span>
-          <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' }}</time>
+          <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
         </button>
       }
     </mat-card-content>
@@ -64,14 +67,15 @@
 
   <mat-card appearance="outlined" class="ticket">
     <mat-card-header
-      ><mat-card-subtitle>Prono</mat-card-subtitle><mat-card-title>Ton ticket</mat-card-title></mat-card-header
+      ><mat-card-subtitle>{{ 'nav.predictions' | translate }}</mat-card-subtitle
+      ><mat-card-title>{{ 'predictions.ticket' | translate }}</mat-card-title></mat-card-header
     >
     <mat-card-content
       ><form [formGroup]="form" (ngSubmit)="submit()">
         <mat-form-field appearance="outline"
-          ><mat-label>Match</mat-label
+          ><mat-label>{{ 'common.match' | translate }}</mat-label
           ><mat-select formControlName="matchId" (selectionChange)="loadPrediction($event.value)"
-            ><mat-option value="">Choisir un match</mat-option>
+            ><mat-option value="">{{ 'predictions.chooseMatch' | translate }}</mat-option>
             @for (match of openMatches(); track match.id) {
               <mat-option [value]="match.id">{{ match.teams[0].code }} vs {{ match.teams[1].code }}</mat-option>
             }
@@ -88,7 +92,7 @@
           /></mat-form-field>
         }
         <button mat-flat-button type="submit" [disabled]="saving">
-          {{ saving ? 'Enregistrement…' : 'Valider le prono' }}
+          {{ (saving ? 'common.saving' : 'predictions.submit') | translate }}
         </button>
       </form></mat-card-content
     >

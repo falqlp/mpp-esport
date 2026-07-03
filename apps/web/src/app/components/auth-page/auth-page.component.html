@@ -1,7 +1,9 @@
 <mat-card appearance="outlined"
   ><mat-card-header
-    ><mat-card-subtitle>Compte joueur</mat-card-subtitle
-    ><mat-card-title>{{ mode === 'login' ? 'Connexion' : 'Créer un compte' }}</mat-card-title></mat-card-header
+    ><mat-card-subtitle>{{ 'auth.playerAccount' | translate }}</mat-card-subtitle
+    ><mat-card-title>{{
+      (mode === 'login' ? 'auth.login' : 'auth.createAccount') | translate
+    }}</mat-card-title></mat-card-header
   ><mat-card-content
     ><form [formGroup]="form" (ngSubmit)="submit()">
       <mat-form-field appearance="outline"
@@ -9,16 +11,17 @@
       /></mat-form-field>
       @if (mode === 'register') {
         <mat-form-field appearance="outline"
-          ><mat-label>Nom affiché</mat-label><input matInput formControlName="displayName" autocomplete="nickname"
+          ><mat-label>{{ 'auth.displayName' | translate }}</mat-label
+          ><input matInput formControlName="displayName" autocomplete="nickname"
         /></mat-form-field>
       }
       <mat-form-field appearance="outline"
-        ><mat-label>Mot de passe</mat-label
+        ><mat-label>{{ 'auth.password' | translate }}</mat-label
         ><input matInput type="password" formControlName="password" autocomplete="current-password" /></mat-form-field
       ><button mat-flat-button type="submit" [disabled]="loading">
-        {{ loading ? 'Patiente…' : mode === 'login' ? 'Se connecter' : "S'inscrire" }}</button
+        {{ (loading ? 'auth.wait' : mode === 'login' ? 'auth.login' : 'auth.register') | translate }}</button
       ><button mat-button type="button" (click)="mode = mode === 'login' ? 'register' : 'login'">
-        {{ mode === 'login' ? 'Créer un compte' : "J'ai déjà un compte" }}
+        {{ (mode === 'login' ? 'auth.createAccount' : 'auth.existingAccount') | translate }}
       </button>
     </form></mat-card-content
   ></mat-card

@@ -1,18 +1,21 @@
 <section class="results-page">
   <mat-card appearance="outlined" class="filter">
     <mat-form-field appearance="outline" subscriptSizing="dynamic"
-      ><mat-label>Compétition</mat-label
+      ><mat-label>{{ 'common.competition' | translate }}</mat-label
       ><mat-select [formControl]="filter"
-        ><mat-option value="favorites">Mes compétitions suivies</mat-option>
+        ><mat-option value="favorites">{{ 'common.followedCompetitions' | translate }}</mat-option>
         @for (competition of competitions; track competition.value) {
-          <mat-option [value]="competition.value">{{ competition.label }}</mat-option>
+          <mat-option [value]="competition.value">{{
+            competition.label | translate: { name: competition.value }
+          }}</mat-option>
         }
       </mat-select></mat-form-field
     >
   </mat-card>
   <mat-card appearance="outlined">
     <mat-card-header
-      ><mat-card-subtitle>Résultats</mat-card-subtitle><mat-card-title>Matchs terminés</mat-card-title></mat-card-header
+      ><mat-card-subtitle>{{ 'nav.results' | translate }}</mat-card-subtitle
+      ><mat-card-title>{{ 'results.finished' | translate }}</mat-card-title></mat-card-header
     >
     <mat-card-content class="matches">
       @for (match of filtered(); track match.id) {
@@ -37,7 +40,7 @@
           </strong>
           @if (prediction(match.id); as saved) {
             <span class="my-prediction"
-              ><small>Mon prono</small
+              ><small>{{ 'results.mine' | translate }}</small
               ><strong
                 >{{ match.teams[0].code }} {{ saved.score[0] }} – {{ saved.score[1] }} {{ match.teams[1].code }}</strong
               ></span
@@ -46,12 +49,12 @@
               >{{ saved.points > 0 ? '+' : '' }}{{ saved.points }} pt{{ saved.points > 1 ? 's' : '' }}</b
             >
           } @else {
-            <span class="no-prediction">Aucun prono</span>
+            <span class="no-prediction">{{ 'results.none' | translate }}</span>
           }
-          <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' }}</time>
+          <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
         </article>
       } @empty {
-        <p>Aucun résultat pour les compétitions suivies.</p>
+        <p>{{ 'results.empty' | translate }}</p>
       }
     </mat-card-content>
   </mat-card>

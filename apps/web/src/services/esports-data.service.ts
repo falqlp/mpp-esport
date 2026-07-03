@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, catchError, forkJoin, map, of, shareReplay, startWith, switchMap, timeout } from 'rxjs';
 import { EsportsApiService, LeaderboardEntry, LolMatch, Prediction } from './esports-api.service';
+import { I18nService } from '../app/i18n/i18n.service';
 
 export interface EsportsData {
   matches: LolMatch[];
@@ -28,6 +29,7 @@ const API_STARTUP_TIMEOUT_MS = 120_000;
 @Injectable({ providedIn: 'root' })
 export class EsportsDataService {
   private readonly api = inject(EsportsApiService);
+  private readonly i18n = inject(I18nService);
   private readonly reloadSubject = new BehaviorSubject<void>(undefined);
 
   readonly state$ = this.reloadSubject.pipe(
@@ -56,8 +58,7 @@ export class EsportsDataService {
           of<EsportsDataState>({
             status: 'error',
             data: EMPTY_DATA,
-            message:
-              'Impossible de charger les données. Le serveur gratuit peut prendre une minute à redémarrer ; réessaie dans quelques instants.',
+            message: this.i18n.translate('data.error'),
           }),
         ),
         startWith<EsportsDataState>({ status: 'loading', data: EMPTY_DATA }),
