@@ -23,6 +23,11 @@ export class GroupsController {
   @Get('competitions') competitions() {
     return this.groups.availableCompetitions();
   }
+  @Get('users/:userId/predictions')
+  @Header('Cache-Control', 'no-store')
+  async memberPredictions(@Param('userId') userId: string, @Headers('authorization') authorization?: string) {
+    return this.groups.memberPredictions(await this.userId(authorization), userId);
+  }
   @Get(':id')
   @Header('Cache-Control', 'no-store')
   async get(@Param('id') id: string, @Headers('authorization') authorization?: string) {

@@ -5,8 +5,8 @@ import { GroupsService } from './groups.service';
 function setup() {
   const prisma = {
     group: { create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
-    groupMembership: { create: vi.fn(), findUnique: vi.fn() },
-    prediction: { groupBy: vi.fn() },
+    groupMembership: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn() },
+    prediction: { findMany: vi.fn(), groupBy: vi.fn() },
     match: { findFirst: vi.fn(), findMany: vi.fn() },
   };
   return { prisma, service: new GroupsService(prisma as never) };
@@ -151,5 +151,55 @@ describe('GroupsService', () => {
       { league: 'LEC', tournament: 'Summer 2026', nextMatchAt: '2026-07-10T12:00:00.000Z' },
       { league: 'LCK', tournament: 'Season 2026', nextMatchAt: '2026-07-11T12:00:00.000Z' },
     ]);
+  });
+
+  it('lists only finished predictions when both users share a group', async () => {
+    const { prisma, service } = setup();
+    prisma.groupMembership.findFirst.mockResolvedValue({ groupId: 'g1' });
+    prisma.prediction.findMany.mockResolvedValue([
+      {
+        id: 'p1',
+        matchId: 'm1',
+        winnerId: 't1',
+        scoreA: 2,
+        scoreB: 1,
+        createdAt: new Date('2026-07-01T10:00:00Z'),
+        points: 3,
+        user: { displayName: 'Ana' },
+        match: {
+          id: 'm1',
+          league: 'LEC',
+          tournament: 'Summer 2026',
+          startsAt: new Date('2026-07-01T12:00:00Z'),
+          format: 'BO3',
+          status: 'finished',
+          teams: [{ id: 't1', name: 'Alpha', code: 'ALP', logoColor: '#000' }],
+          winnerId: 't1',
+          scoreA: 2,
+          scoreB: 0,
+          leagueLogoUrl: null,
+        },
+      },
+    ]);
+
+    const result = await service.memberPredictions('u1', 'u2');
+
+    expect(prisma.groupMembership.findFirst).toHaveBeenCalledWith({
+      where: { userId: 'u1', group: { memberships: { some: { userId: 'u2' } } } },
+      select: { groupId: true },
+    });
+    expect(prisma.prediction.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { userId: 'u2', match: { status: 'finished' } } }),
+    );
+    expect(result.playerName).toBe('Ana');
+    expect(result.predictions[0]).toEqual(expect.objectContaining({ matchId: 'm1', score: [2, 1], points: 3 }));
+  });
+
+  it('hides predictions from users who do not share a group', async () => {
+    const { prisma, service } = setup();
+    prisma.groupMembership.findFirst.mockResolvedValue(null);
+
+    await expect(service.memberPredictions('u1', 'u2')).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.prediction.findMany).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,49 @@
+<section class="history-page">
+  <a mat-stroked-button routerLink="/">{{ 'memberHistory.back' | translate }}</a>
+
+  @if (state$ | async; as state) {
+    @if (state.status === 'loading') {
+      <mat-card appearance="outlined"
+        ><mat-card-content>{{ 'app.loading' | translate }}</mat-card-content></mat-card
+      >
+    } @else if (state.status === 'error') {
+      <mat-card appearance="outlined"
+        ><mat-card-content>{{ 'memberHistory.error' | translate }}</mat-card-content></mat-card
+      >
+    } @else {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-subtitle>{{ 'memberHistory.subtitle' | translate }}</mat-card-subtitle>
+          <mat-card-title>{{ state.history.playerName }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="matches">
+          @for (prediction of state.history.predictions; track prediction.id) {
+            <article class="prediction-row">
+              <span>
+                <strong>{{ prediction.match.league }}</strong>
+                <small>{{ prediction.match.tournament }} · {{ prediction.match.format }}</small>
+              </span>
+              <strong>
+                {{ prediction.match.teams[0].code }} {{ prediction.score[0] }} – {{ prediction.score[1] }}
+                {{ prediction.match.teams[1].code }}
+              </strong>
+              <span class="result">
+                <small>{{ 'memberHistory.result' | translate }}</small>
+                <strong>
+                  {{ prediction.match.teams[0].code }} {{ prediction.match.result?.score?.[0] }} –
+                  {{ prediction.match.result?.score?.[1] }} {{ prediction.match.teams[1].code }}
+                </strong>
+              </span>
+              <b class="points" [class.won]="prediction.points > 0">
+                {{ prediction.points > 0 ? '+' : '' }}{{ prediction.points }} {{ 'common.points' | translate }}
+              </b>
+              <time>{{ prediction.match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
+            </article>
+          } @empty {
+            <p>{{ 'memberHistory.empty' | translate }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</section>

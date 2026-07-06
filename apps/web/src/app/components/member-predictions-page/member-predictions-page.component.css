@@ -1,0 +1,45 @@
+.history-page {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem auto;
+  max-width: 1100px;
+  padding: 0 1rem;
+}
+.history-page > a {
+  justify-self: start;
+}
+.matches {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+.prediction-row {
+  align-items: center;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.4fr 1fr 1fr auto auto;
+  padding: 1rem 0;
+}
+.prediction-row span {
+  display: grid;
+}
+.prediction-row small,
+time {
+  color: var(--mat-sys-on-surface-variant);
+}
+.points {
+  white-space: nowrap;
+}
+.points.won {
+  color: var(--mat-sys-primary);
+}
+@media (max-width: 760px) {
+  .prediction-row {
+    grid-template-columns: 1fr auto;
+  }
+  .result,
+  time {
+    grid-column: 1 / -1;
+  }
+}

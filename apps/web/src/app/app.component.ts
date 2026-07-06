@@ -1,5 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../services/auth.service';
@@ -28,6 +29,7 @@ import { TranslatePipe } from './i18n/translate.pipe';
     ResultsTabComponent,
     ServerStartupNoticeComponent,
     TranslatePipe,
+    RouterOutlet,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
@@ -35,9 +37,13 @@ import { TranslatePipe } from './i18n/translate.pipe';
 export class AppComponent {
   private readonly auth = inject(AuthService);
   private readonly data = inject(EsportsDataService);
+  private readonly router = inject(Router);
   readonly user$ = this.auth.user$;
   readonly state$ = this.data.state$;
   activeTab: AppTab = 'predictions';
+  isMemberPage(): boolean {
+    return this.router.url.startsWith('/user/');
+  }
   reload(): void {
     this.data.reload();
   }

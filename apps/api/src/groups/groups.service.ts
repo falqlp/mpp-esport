@@ -113,6 +113,55 @@ export class GroupsService {
     return { ...this.summary(group), leaderboard };
   }
 
+  async memberPredictions(viewerId: string, memberId: string) {
+    const sharedGroup = await this.prisma.groupMembership.findFirst({
+      where: { userId: viewerId, group: { memberships: { some: { userId: memberId } } } },
+      select: { groupId: true },
+    });
+    if (!sharedGroup) throw new NotFoundException('Group member not found');
+
+    const predictions = await this.prisma.prediction.findMany({
+      where: { userId: memberId, match: { status: 'finished' } },
+      include: { user: { select: { displayName: true } }, match: true },
+      orderBy: { match: { startsAt: 'desc' } },
+    });
+    const playerName = predictions[0]?.user.displayName ?? (await this.memberName(memberId));
+    return {
+      userId: memberId,
+      playerName,
+      predictions: predictions.map((prediction) => ({
+        id: prediction.id,
+        matchId: prediction.matchId,
+        winnerId: prediction.winnerId,
+        createdAt: prediction.createdAt.toISOString(),
+        points: prediction.points,
+        score: [prediction.scoreA, prediction.scoreB] as [number, number],
+        match: {
+          ...prediction.match,
+          startsAt: prediction.match.startsAt.toISOString(),
+          syncedAt: prediction.match.syncedAt?.toISOString(),
+          updatedAt: prediction.match.updatedAt?.toISOString(),
+          result:
+            prediction.match.winnerId && prediction.match.scoreA !== null && prediction.match.scoreB !== null
+              ? {
+                  winnerId: prediction.match.winnerId,
+                  score: [prediction.match.scoreA, prediction.match.scoreB],
+                }
+              : undefined,
+        },
+      })),
+    };
+  }
+
+  private async memberName(userId: string): Promise<string> {
+    const membership = await this.prisma.groupMembership.findFirst({
+      where: { userId },
+      select: { user: { select: { displayName: true } } },
+    });
+    if (!membership) throw new NotFoundException('Group member not found');
+    return membership.user.displayName;
+  }
+
   private summary(group: GroupWithMembers, revealCode = true) {
     return {
       id: group.id,

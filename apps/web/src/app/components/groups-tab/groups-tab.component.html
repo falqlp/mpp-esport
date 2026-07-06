@@ -120,7 +120,9 @@
             @for (player of currentGroup.leaderboard; track player.userId; let rank = $index) {
               <mat-list-item>
                 <span matListItemIcon class="rank">{{ rank + 1 }}</span>
-                <strong matListItemTitle>{{ player.playerName }}</strong>
+                <a matListItemTitle class="player-link" [routerLink]="['/user', player.userId]">
+                  {{ player.playerName }}
+                </a>
                 <span matListItemMeta>{{ player.points }} {{ 'common.points' | translate }}</span>
               </mat-list-item>
             }

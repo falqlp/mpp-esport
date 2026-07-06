@@ -182,3 +182,14 @@ mat-card-content {
     flex-direction: column;
   }
 }
+.player-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 0.2rem;
+}
+
+.player-link:hover {
+  text-decoration-color: currentColor;
+}

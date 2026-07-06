@@ -2,7 +2,9 @@
   <app-server-startup-notice />
   @if (user$ | async; as user) {
     <app-header [user]="user" [activeTab]="activeTab" (tabChange)="activeTab = $event" (logout)="logout()" />
-    @if (state$ | async; as state) {
+    @if (isMemberPage()) {
+      <router-outlet />
+    } @else if (state$ | async; as state) {
       @if (state.status === 'loading') {
         <mat-card appearance="outlined" class="status"
           ><mat-card-content>{{ 'app.loading' | translate }}</mat-card-content></mat-card

@@ -9,6 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
+import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
   AvailableGroupCompetition,
@@ -34,6 +35,7 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
     MatSnackBarModule,
     MatTabsModule,
     TranslatePipe,
+    RouterLink,
   ],
   templateUrl: './groups-tab.component.html',
   styleUrl: './groups-tab.component.css',

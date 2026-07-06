@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { LolMatch } from './esports-api.service';
 
 export interface GroupSummary {
   id: string;
@@ -32,6 +33,22 @@ export interface AvailableGroupCompetition {
   nextMatchAt: string;
 }
 
+export interface MemberPrediction {
+  id: string;
+  matchId: string;
+  winnerId: string;
+  score: [number, number];
+  createdAt: string;
+  points: number;
+  match: LolMatch;
+}
+
+export interface MemberPredictionHistory {
+  userId: string;
+  playerName: string;
+  predictions: MemberPrediction[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class GroupsApiService {
   private readonly http = inject(HttpClient);
@@ -46,6 +63,9 @@ export class GroupsApiService {
   }
   get(id: string): Observable<GroupDetails> {
     return this.http.get<GroupDetails>(`${this.baseUrl}/${id}`);
+  }
+  memberPredictions(userId: string): Observable<MemberPredictionHistory> {
+    return this.http.get<MemberPredictionHistory>(`${this.baseUrl}/users/${encodeURIComponent(userId)}/predictions`);
   }
   competitions(): Observable<AvailableGroupCompetition[]> {
     return this.http.get<AvailableGroupCompetition[]>(`${this.baseUrl}/competitions`);
