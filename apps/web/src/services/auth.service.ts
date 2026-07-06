@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../environments/environment';
 
-export type CompetitionKey = 'LEC' | 'LCK' | 'LCS' | 'LPL' | 'MSI' | 'FIRST_STAND' | 'WORLDS';
+export type CompetitionKey = 'LEC' | 'LCK' | 'LCS' | 'LPL' | 'MSI' | 'FIRST_STAND' | 'WORLDS' | 'EWC';
 export interface AuthUser {
   id: string;
   email: string;

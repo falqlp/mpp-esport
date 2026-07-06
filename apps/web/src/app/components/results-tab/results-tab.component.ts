@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { RouterLink } from '@angular/router';
 import { CompetitionKey } from '../../../services/auth.service';
 import { LolMatch, Prediction } from '../../../services/esports-api.service';
 import { COMPETITIONS, filterMatches } from '../../competition.utils';
@@ -23,6 +24,7 @@ import { filterPredictedMatches } from './results-filter';
     MatSelectModule,
     MatSlideToggleModule,
     TranslatePipe,
+    RouterLink,
   ],
   templateUrl: './results-tab.component.html',
   styleUrl: './results-tab.component.css',

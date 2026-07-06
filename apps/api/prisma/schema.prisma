@@ -12,7 +12,7 @@ model User {
   email        String   @unique
   displayName  String
   passwordHash String
-  favoriteCompetitions String[] @default([])
+  favoriteCompetitions String[] @default(["EWC"])
   avatarUrl     String?  @db.Text
   bio           String?  @db.VarChar(300)
   createdAt    DateTime @default(now())

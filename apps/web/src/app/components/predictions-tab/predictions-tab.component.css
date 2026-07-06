@@ -75,7 +75,12 @@ time {
   display: flex;
   height: 46px;
   justify-content: center;
+  color: inherit;
+  text-decoration: none;
   width: 56px;
+}
+.team-logo:hover {
+  outline: 2px solid var(--mat-sys-primary);
 }
 .team-logo img {
   height: 38px;

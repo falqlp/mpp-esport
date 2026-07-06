@@ -53,8 +53,8 @@ export class AppComponent {
     });
   }
 
-  isMemberPage(): boolean {
-    return this.router.url.startsWith('/user/');
+  isDetailPage(): boolean {
+    return this.router.url.startsWith('/user/') || this.router.url.startsWith('/team/');
   }
   selectTab(tab: AppTab): void {
     this.activeTab = tab;

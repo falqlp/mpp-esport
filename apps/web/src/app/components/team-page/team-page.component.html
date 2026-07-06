@@ -1,0 +1,87 @@
+@if (state$ | async; as state) {
+  @if (state.status === 'loading') {
+    <mat-card appearance="outlined"
+      ><mat-card-content>{{ 'app.loading' | translate }}</mat-card-content></mat-card
+    >
+  } @else if (state.page; as page) {
+    <section class="team-page">
+      <a mat-button routerLink="/predictions">← {{ 'team.back' | translate }}</a>
+      <header class="team-header">
+        @if (page.team.logoUrl) {
+          <img [src]="page.team.logoUrl" [alt]="page.team.name" />
+        }
+        <div>
+          <small>{{ page.team.code }}</small>
+          <h1>{{ page.team.name }}</h1>
+        </div>
+      </header>
+
+      <mat-card appearance="outlined">
+        <mat-card-header
+          ><mat-card-title>{{ 'team.upcoming' | translate }}</mat-card-title></mat-card-header
+        >
+        <mat-card-content class="matches">
+          @for (item of page.upcomingMatches; track item.match.id) {
+            <article class="match-row">
+              <span
+                ><strong>{{ item.match.league }}</strong
+                ><small>{{ item.match.tournament }} · {{ item.match.format }}</small></span
+              >
+              <span class="opponent">
+                @if (opponent(item.match, page.team.id).logoUrl) {
+                  <img
+                    [src]="opponent(item.match, page.team.id).logoUrl"
+                    [alt]="opponent(item.match, page.team.id).name"
+                  />
+                }
+                <strong>{{ 'team.versus' | translate: { name: opponent(item.match, page.team.id).name } }}</strong>
+              </span>
+              <time>{{ item.match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
+            </article>
+          } @empty {
+            <p>{{ 'team.noUpcoming' | translate }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-header
+          ><mat-card-title>{{ 'team.finished' | translate }}</mat-card-title></mat-card-header
+        >
+        <mat-card-content class="matches">
+          @for (item of page.finishedMatches; track item.match.id) {
+            <article
+              class="match-row result"
+              [class.win]="item.outcome === 'win'"
+              [class.loss]="item.outcome === 'loss'"
+            >
+              <span
+                ><strong>{{ item.match.league }}</strong
+                ><small>{{ item.match.tournament }} · {{ item.match.format }}</small></span
+              >
+              <span class="opponent">
+                @if (opponent(item.match, page.team.id).logoUrl) {
+                  <img
+                    [src]="opponent(item.match, page.team.id).logoUrl"
+                    [alt]="opponent(item.match, page.team.id).name"
+                  />
+                }
+                <strong>{{ 'team.versus' | translate: { name: opponent(item.match, page.team.id).name } }}</strong>
+              </span>
+              <strong class="score"
+                >{{ score(item.match, page.team.id) }} ·
+                {{ (item.outcome === 'win' ? 'team.win' : 'team.loss') | translate }}</strong
+              >
+            </article>
+          } @empty {
+            <p>{{ 'team.noFinished' | translate }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+  } @else {
+    <mat-card appearance="outlined"
+      ><mat-card-content>{{ 'team.notFound' | translate }}</mat-card-content></mat-card
+    >
+  }
+}

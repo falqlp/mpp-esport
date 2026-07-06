@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 import { AuthUser } from '../../../services/auth.service';
 import { EsportsApiService, LolMatch, Prediction } from '../../../services/esports-api.service';
@@ -35,6 +36,7 @@ const AUTOSAVE_DELAY_MS = 1500;
     MatInputModule,
     MatSelectModule,
     MatSnackBarModule,
+    RouterLink,
     TranslatePipe,
   ],
   templateUrl: './predictions-tab.component.html',

@@ -9,6 +9,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, withHashLocation } from '@angular/router';
 import { AppComponent } from './app/app.component';
 import { MemberPredictionsPageComponent } from './app/components/member-predictions-page/member-predictions-page.component';
+import { TeamPageComponent } from './app/components/team-page/team-page.component';
 import { authInterceptor } from './services/auth.service';
 
 registerLocaleData(localeFr);
@@ -29,6 +30,7 @@ bootstrapApplication(AppComponent, {
         { path: 'profile', children: [] },
         { path: 'preferences', children: [] },
         { path: 'user/:id', component: MemberPredictionsPageComponent },
+        { path: 'team/:id', component: TeamPageComponent },
         { path: '**', redirectTo: 'predictions' },
       ],
       withHashLocation(),

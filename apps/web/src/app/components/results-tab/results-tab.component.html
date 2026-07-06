@@ -35,12 +35,16 @@
           >
           <strong class="result-teams">
             @if (match.teams[0].logoUrl) {
-              <img [src]="match.teams[0].logoUrl" [alt]="match.teams[0].name" />
+              <a [routerLink]="['/team', match.teams[0].id]"
+                ><img [src]="match.teams[0].logoUrl" [alt]="match.teams[0].name"
+              /></a>
             }
             {{ match.teams[0].code }} {{ match.result?.score?.[0] }} – {{ match.result?.score?.[1] }}
             {{ match.teams[1].code }}
             @if (match.teams[1].logoUrl) {
-              <img [src]="match.teams[1].logoUrl" [alt]="match.teams[1].name" />
+              <a [routerLink]="['/team', match.teams[1].id]"
+                ><img [src]="match.teams[1].logoUrl" [alt]="match.teams[1].name"
+              /></a>
             }
           </strong>
           @if (prediction(match.id); as saved) {

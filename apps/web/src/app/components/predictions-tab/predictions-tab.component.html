@@ -42,13 +42,13 @@
           </span>
 
           <span class="teams">
-            <span class="team-logo">
+            <a class="team-logo" [routerLink]="['/team', match.teams[0].id]">
               @if (match.teams[0].logoUrl) {
                 <img [src]="match.teams[0].logoUrl" [alt]="match.teams[0].name" />
               } @else {
                 <b>{{ match.teams[0].code }}</b>
               }
-            </span>
+            </a>
             @if (match.status === 'upcoming') {
               <form class="score-form" [formGroup]="scoreForm(match)">
                 <span class="score-fields">
@@ -69,13 +69,13 @@
             } @else {
               <small>VS</small>
             }
-            <span class="team-logo">
+            <a class="team-logo" [routerLink]="['/team', match.teams[1].id]">
               @if (match.teams[1].logoUrl) {
                 <img [src]="match.teams[1].logoUrl" [alt]="match.teams[1].name" />
               } @else {
                 <b>{{ match.teams[1].code }}</b>
               }
-            </span>
+            </a>
           </span>
 
           <span class="schedule">

@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 import { PrismaService } from '../prisma.service';
 
 const scrypt = promisify(scryptCallback);
-export const COMPETITION_KEYS = ['LEC', 'LCK', 'LCS', 'LPL', 'MSI', 'FIRST_STAND', 'WORLDS'] as const;
+export const COMPETITION_KEYS = ['LEC', 'LCK', 'LCS', 'LPL', 'MSI', 'FIRST_STAND', 'WORLDS', 'EWC'] as const;
 export type CompetitionKey = (typeof COMPETITION_KEYS)[number];
 export interface AuthUser {
   id: string;

@@ -6,7 +6,7 @@
     ><p>{{ 'profile.explanation' | translate }}</p>
     <mat-form-field appearance="outline" subscriptSizing="dynamic"
       ><mat-label>{{ 'profile.search' | translate }}</mat-label
-      ><input matInput type="search" [formControl]="search" placeholder="LEC, LCK, Worlds…"
+      ><input matInput type="search" [formControl]="search" [placeholder]="'profile.searchPlaceholder' | translate"
     /></mat-form-field>
     <div class="checklist">
       @for (competition of filteredOptions(); track competition.value) {

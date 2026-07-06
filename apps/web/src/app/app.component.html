@@ -2,7 +2,7 @@
   <app-server-startup-notice />
   @if (user$ | async; as user) {
     <app-header [user]="user" [activeTab]="activeTab" (tabChange)="selectTab($event)" (logout)="logout()" />
-    @if (isMemberPage()) {
+    @if (isDetailPage()) {
       <router-outlet />
     } @else if (state$ | async; as state) {
       @if (state.status === 'loading') {
