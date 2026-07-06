@@ -1,16 +1,21 @@
 <section class="results-page">
   <mat-card appearance="outlined" class="filter">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic"
-      ><mat-label>{{ 'common.competition' | translate }}</mat-label
-      ><mat-select [formControl]="filter"
-        ><mat-option value="favorites">{{ 'common.followedCompetitions' | translate }}</mat-option>
-        @for (competition of competitions; track competition.value) {
-          <mat-option [value]="competition.value">{{
-            competition.label | translate: { name: competition.value }
-          }}</mat-option>
-        }
-      </mat-select></mat-form-field
-    >
+    <div class="filter-controls">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"
+        ><mat-label>{{ 'common.competition' | translate }}</mat-label
+        ><mat-select [formControl]="filter"
+          ><mat-option value="favorites">{{ 'common.followedCompetitions' | translate }}</mat-option>
+          @for (competition of competitions; track competition.value) {
+            <mat-option [value]="competition.value">{{
+              competition.label | translate: { name: competition.value }
+            }}</mat-option>
+          }
+        </mat-select></mat-form-field
+      >
+      <div class="toggle-filter">
+        <mat-slide-toggle [formControl]="onlyPredicted">{{ 'results.onlyPredicted' | translate }}</mat-slide-toggle>
+      </div>
+    </div>
   </mat-card>
   <mat-card appearance="outlined">
     <mat-card-header
@@ -54,7 +59,11 @@
           <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
         </article>
       } @empty {
-        <p>{{ 'results.empty' | translate }}</p>
+        @if (onlyPredicted.value) {
+          <p>{{ 'results.emptyPredicted' | translate }}</p>
+        } @else {
+          <p>{{ 'results.empty' | translate }}</p>
+        }
       }
     </mat-card-content>
   </mat-card>

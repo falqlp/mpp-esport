@@ -4,13 +4,37 @@
   gap: 16px;
 }
 .filter {
-  display: flex;
-  justify-content: flex-end;
   padding: 12px 16px;
 }
-.filter mat-form-field {
-  max-width: 420px;
+.filter-controls {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(260px, 420px) minmax(280px, auto);
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 760px;
   width: 100%;
+}
+.filter mat-form-field {
+  width: 100%;
+}
+.toggle-filter {
+  align-items: center;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  display: flex;
+  min-height: 56px;
+  padding: 0 16px;
+}
+@media (max-width: 680px) {
+  .filter-controls {
+    grid-template-columns: 1fr;
+  }
+  .toggle-filter {
+    padding: 10px 14px;
+  }
 }
 mat-card-header {
   margin-bottom: 16px;
