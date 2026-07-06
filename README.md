@@ -1,5 +1,7 @@
 # MPP Esport
 
+[![Codecov](https://codecov.io/gh/falqlp/mpp-esport/branch/main/graph/badge.svg)](https://codecov.io/gh/falqlp/mpp-esport)
+
 V1 d'une application de pronostics esport orientée League of Legends, avec un front Angular et une API NestJS.
 
 ## Prérequis
