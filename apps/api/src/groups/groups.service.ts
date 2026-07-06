@@ -153,6 +153,13 @@ export class GroupsService {
     };
   }
 
+  async delete(groupId: string, userId: string): Promise<{ deleted: true }> {
+    const group = await this.prisma.group.findUnique({ where: { id: groupId }, select: { ownerId: true } });
+    if (!group || group.ownerId !== userId) throw new NotFoundException('Group not found');
+    await this.prisma.group.delete({ where: { id: groupId } });
+    return { deleted: true };
+  }
+
   private async memberName(userId: string): Promise<string> {
     const membership = await this.prisma.groupMembership.findFirst({
       where: { userId },

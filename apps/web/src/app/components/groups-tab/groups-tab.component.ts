@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -59,6 +59,8 @@ export class GroupsTabComponent implements OnInit {
   readonly publicGroups = signal<GroupSummary[]>([]);
   readonly selected = signal<GroupDetails | undefined>(undefined);
   readonly busy = signal(false);
+  readonly confirmingDelete = signal(false);
+  @Input({ required: true }) userId = '';
 
   ngOnInit(): void {
     this.loadMine();
@@ -69,7 +71,8 @@ export class GroupsTabComponent implements OnInit {
     this.api.mine().subscribe({
       next: (groups) => {
         this.groups.set(groups);
-        if (selectId) this.open(selectId);
+        const groupToOpen = selectId ?? (!this.selected() ? groups[0]?.id : undefined);
+        if (groupToOpen) this.open(groupToOpen);
       },
       error: () => this.error(),
     });
@@ -126,6 +129,26 @@ export class GroupsTabComponent implements OnInit {
   joinPublic(id: string): void {
     this.join(this.api.joinPublic(id));
   }
+  deleteSelected(): void {
+    const group = this.selected();
+    if (!group || group.ownerId !== this.userId) return;
+    this.busy.set(true);
+    this.api
+      .delete(group.id)
+      .pipe(finalize(() => this.busy.set(false)))
+      .subscribe({
+        next: () => {
+          const remainingGroups = this.groups().filter(({ id }) => id !== group.id);
+          this.groups.set(remainingGroups);
+          this.publicGroups.update((groups) => groups.filter(({ id }) => id !== group.id));
+          this.selected.set(undefined);
+          this.confirmingDelete.set(false);
+          if (remainingGroups[0]) this.open(remainingGroups[0].id);
+          this.notice('groups.deleted');
+        },
+        error: () => this.error(),
+      });
+  }
   private join(request: ReturnType<GroupsApiService['joinByCode']>): void {
     this.busy.set(true);
     request.pipe(finalize(() => this.busy.set(false))).subscribe({
@@ -138,7 +161,7 @@ export class GroupsTabComponent implements OnInit {
       error: () => this.error(),
     });
   }
-  private notice(key: 'groups.created' | 'groups.joined'): void {
+  private notice(key: 'groups.created' | 'groups.joined' | 'groups.deleted'): void {
     this.snackBar.open(this.i18n.translate(key), this.i18n.translate('common.close'), { duration: 3000 });
   }
   private error(): void {

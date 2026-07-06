@@ -4,7 +4,7 @@ import { GroupsService } from './groups.service';
 
 function setup() {
   const prisma = {
-    group: { create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+    group: { create: vi.fn(), delete: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
     groupMembership: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn() },
     prediction: { findMany: vi.fn(), groupBy: vi.fn() },
     match: { findFirst: vi.fn(), findMany: vi.fn() },
@@ -201,5 +201,15 @@ describe('GroupsService', () => {
 
     await expect(service.memberPredictions('u1', 'u2')).rejects.toBeInstanceOf(NotFoundException);
     expect(prisma.prediction.findMany).not.toHaveBeenCalled();
+  });
+
+  it('allows only the owner to delete a group', async () => {
+    const { prisma, service } = setup();
+    prisma.group.findUnique.mockResolvedValueOnce({ ownerId: 'u1' }).mockResolvedValueOnce({ ownerId: 'u2' });
+    prisma.group.delete.mockResolvedValue({});
+
+    await expect(service.delete('g1', 'u1')).resolves.toEqual({ deleted: true });
+    expect(prisma.group.delete).toHaveBeenCalledWith({ where: { id: 'g1' } });
+    await expect(service.delete('g1', 'u1')).rejects.toBeInstanceOf(NotFoundException);
   });
 });

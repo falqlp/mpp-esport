@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, Headers, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Headers, Param, Post, Query } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { GroupsService } from './groups.service';
 
@@ -44,5 +44,9 @@ export class GroupsController {
     @Headers('authorization') authorization?: string,
   ) {
     return this.groups.join(await this.userId(authorization), body);
+  }
+  @Delete(':id')
+  async delete(@Param('id') id: string, @Headers('authorization') authorization?: string) {
+    return this.groups.delete(id, await this.userId(authorization));
   }
 }

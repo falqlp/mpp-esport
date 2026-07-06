@@ -5,27 +5,57 @@
   align-items: start;
   display: grid;
   gap: 20px;
+  grid-template-areas:
+    'groups main'
+    'actions main';
   grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.5fr);
 }
-.side,
 .main,
 .form {
   align-content: start;
   display: grid;
   gap: 16px;
 }
-.side,
 .main {
   min-width: 0;
 }
+.my-groups-card {
+  grid-area: groups;
+}
 .group-actions-card {
+  grid-area: actions;
   overflow: hidden;
+}
+.main {
+  grid-area: main;
 }
 .tab-content {
   padding: 20px 16px 18px;
 }
 .leaderboard-card {
   min-height: 520px;
+}
+.leaderboard-card mat-card-header {
+  align-items: center;
+}
+.delete-button {
+  color: var(--mat-sys-error);
+  margin-left: auto;
+}
+.delete-confirmation {
+  align-items: center;
+  background: var(--mat-sys-error-container);
+  border-radius: 12px;
+  color: var(--mat-sys-on-error-container);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+.delete-actions {
+  display: flex;
+  gap: 8px;
 }
 .invitation-code {
   background: var(--mat-sys-surface-container);
@@ -175,6 +205,10 @@ mat-card-content {
 }
 @media (max-width: 760px) {
   .groups-layout {
+    grid-template-areas:
+      'groups'
+      'main'
+      'actions';
     grid-template-columns: 1fr;
   }
   .search {

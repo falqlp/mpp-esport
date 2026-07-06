@@ -33,7 +33,7 @@
             />
           }
           @case ('groups') {
-            <app-groups-tab />
+            <app-groups-tab [userId]="user.id" />
           }
           @case ('profile') {
             <app-profile-tab [user]="user" (saved)="reload()" />

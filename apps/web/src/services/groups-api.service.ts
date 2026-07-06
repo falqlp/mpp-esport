@@ -79,4 +79,7 @@ export class GroupsApiService {
   joinPublic(groupId: string): Observable<GroupDetails> {
     return this.http.post<GroupDetails>(`${this.baseUrl}/join`, { groupId });
   }
+  delete(groupId: string): Observable<{ deleted: true }> {
+    return this.http.delete<{ deleted: true }>(`${this.baseUrl}/${groupId}`);
+  }
 }
