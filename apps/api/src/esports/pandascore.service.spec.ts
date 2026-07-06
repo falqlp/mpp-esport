@@ -24,6 +24,7 @@ describe('PandaScoreService', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     delete process.env.PANDASCORE_API_TOKEN;
+    delete process.env.PANDASCORE_MAX_PAGES_PER_FEED;
   });
   it('requires an API token', async () => {
     await expect(new PandaScoreService().getMatch('pandascore-1')).rejects.toBeInstanceOf(ServiceUnavailableException);
@@ -48,5 +49,156 @@ describe('PandaScoreService', () => {
     vi.stubGlobal('fetch', fetchMock);
     expect(await new PandaScoreService().getMatch('bad')).toBeUndefined();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('loads all feeds, paginates, caches results, and supports forced refresh', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    process.env.PANDASCORE_MAX_PAGES_PER_FEED = '2';
+    const fetchMock = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(JSON.stringify([panda]), {
+          status: 200,
+          headers: { 'x-total': '101' },
+        }),
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const service = new PandaScoreService();
+
+    const first = await service.getMatches();
+    expect(first).toHaveLength(6);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/lol/matches/past?page[number]=2&page[size]=100&sort=-scheduled_at'),
+      expect.anything(),
+    );
+
+    await expect(service.getMatches()).resolves.toBe(first);
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+
+    await service.getMatches(true);
+    expect(fetchMock).toHaveBeenCalledTimes(12);
+  });
+
+  it('shares an in-flight feed request between callers', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    let release: (() => void) | undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fetchMock = vi.fn().mockImplementation(async () => {
+      await gate;
+      return new Response('[]', { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const service = new PandaScoreService();
+
+    const first = service.getMatches();
+    const second = service.getMatches();
+    release?.();
+
+    await expect(Promise.all([first, second])).resolves.toEqual([[], []]);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('falls back to one page when the configured page limit is invalid', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    process.env.PANDASCORE_MAX_PAGES_PER_FEED = 'invalid';
+    const fetchMock = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response('[]', {
+          status: 200,
+          headers: { 'x-total': '500' },
+        }),
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await new PandaScoreService().getMatches();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('filters incomplete matches from feeds', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    const incomplete = { ...panda, scheduled_at: null };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => Promise.resolve(new Response(JSON.stringify([incomplete]), { status: 200 }))),
+    );
+
+    await expect(new PandaScoreService().getMatches()).resolves.toEqual([]);
+  });
+
+  it('maps live and upcoming matches with format and metadata fallbacks', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    const live = {
+      ...panda,
+      status: 'running',
+      number_of_games: 5,
+      winner_id: null,
+      league: { name: 'LCK', image_url: null },
+      serie: null,
+      tournament: { name: 'Playoffs' },
+      opponents: [
+        { opponent: { id: -1, name: 'Gamma', acronym: '', image_url: 'logo.png' } },
+        { opponent: { id: 2, name: 'Delta', acronym: 'DEL', image_url: null } },
+      ],
+      results: [],
+    };
+    const upcoming = {
+      ...live,
+      id: 2,
+      status: 'postponed',
+      number_of_games: 1,
+      serie: { full_name: null, name: 'Summer' },
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(live), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(upcoming), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const service = new PandaScoreService();
+
+    await expect(service.getMatch('1')).resolves.toEqual(
+      expect.objectContaining({ status: 'live', format: 'BO5', tournament: 'Playoffs' }),
+    );
+    const upcomingMatch = await service.getMatch('2');
+    expect(upcomingMatch).toEqual(expect.objectContaining({ status: 'upcoming', format: 'BO1', tournament: 'Summer' }));
+    expect(upcomingMatch?.teams[0]).toEqual(
+      expect.objectContaining({ code: 'GAM', logoUrl: 'logo.png', logoColor: expect.any(String) }),
+    );
+    expect(upcomingMatch).not.toHaveProperty('result');
+    expect(upcomingMatch).not.toHaveProperty('leagueLogoUrl');
+  });
+
+  it('returns a cached match without calling the match endpoint', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(new Response(JSON.stringify([panda]), { status: 200 })));
+    vi.stubGlobal('fetch', fetchMock);
+    const service = new PandaScoreService();
+    await service.getMatches();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    await expect(service.getMatch('pandascore-1')).resolves.toEqual(expect.objectContaining({ id: 'pandascore-1' }));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('reports network, rate-limit, and generic API failures', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce(new Response('{}', { status: 429 }))
+      .mockResolvedValueOnce(new Response('{}', { status: 500 }))
+      .mockRejectedValueOnce('network down');
+    vi.stubGlobal('fetch', fetchMock);
+    const service = new PandaScoreService();
+
+    await expect(service.getMatch('1')).rejects.toThrow('PandaScore API is unreachable');
+    await expect(service.getMatch('1')).rejects.toThrow('PandaScore rate limit reached');
+    await expect(service.getMatch('1')).rejects.toThrow('PandaScore API returned 500');
+    await expect(service.getMatch('1')).rejects.toThrow('PandaScore API is unreachable');
   });
 });
