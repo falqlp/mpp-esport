@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { CreatePredictionDto } from './esports.types';
 import { EsportsService } from './esports.service';
@@ -27,6 +27,12 @@ export class EsportsController {
   async createPrediction(@Body() dto: CreatePredictionDto, @Headers('authorization') authorization?: string) {
     const user = this.auth.requireUser(await this.auth.authenticate(authorization));
     return this.esportsService.createPrediction(dto, user);
+  }
+
+  @Delete('predictions/:matchId')
+  async deletePrediction(@Param('matchId') matchId: string, @Headers('authorization') authorization?: string) {
+    const user = this.auth.requireUser(await this.auth.authenticate(authorization));
+    return this.esportsService.deletePrediction(matchId, user.id);
   }
 
   @Post('sync')

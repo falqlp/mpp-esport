@@ -68,6 +68,15 @@ export class EsportsService {
     return this.toPrediction(prediction);
   }
 
+  async deletePrediction(matchId: string, userId: string): Promise<void> {
+    const storedMatch = await this.prisma.match.findUnique({ where: { id: matchId } });
+    if (!storedMatch) throw new NotFoundException('Match not found');
+    if (storedMatch.status !== 'upcoming' || storedMatch.startsAt.getTime() <= Date.now()) {
+      throw new BadRequestException('Predictions are closed for this match');
+    }
+    await this.prisma.prediction.deleteMany({ where: { matchId, userId } });
+  }
+
   private computePoints(match: LolMatch, prediction: CreatePredictionDto): number {
     if (!match.result) return 0;
     const predictedWinnerId = this.winnerFromScore(match, prediction.score);

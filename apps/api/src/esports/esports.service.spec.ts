@@ -23,7 +23,7 @@ const match = (extra = {}) => ({
 function setup() {
   const prisma = {
     match: { findMany: vi.fn(), findUnique: vi.fn() },
-    prediction: { findMany: vi.fn(), upsert: vi.fn() },
+    prediction: { findMany: vi.fn(), upsert: vi.fn(), deleteMany: vi.fn() },
   };
   return { prisma, service: new EsportsService(prisma as never) };
 }
@@ -81,5 +81,23 @@ describe('EsportsService', () => {
       }),
     );
     expect(result.playerName).toBe('Leo');
+  });
+
+  it('deletes only the authenticated user prediction for an upcoming match', async () => {
+    const { service, prisma } = setup();
+    prisma.match.findUnique.mockResolvedValue(match());
+    prisma.prediction.deleteMany.mockResolvedValue({ count: 1 });
+
+    await service.deletePrediction('m1', 'u1');
+
+    expect(prisma.prediction.deleteMany).toHaveBeenCalledWith({ where: { matchId: 'm1', userId: 'u1' } });
+  });
+
+  it('rejects deleting a prediction once the match has started', async () => {
+    const { service, prisma } = setup();
+    prisma.match.findUnique.mockResolvedValue(match({ status: 'live' }));
+
+    await expect(service.deletePrediction('m1', 'u1')).rejects.toThrow('Predictions are closed for this match');
+    expect(prisma.prediction.deleteMany).not.toHaveBeenCalled();
   });
 });

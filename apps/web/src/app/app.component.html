@@ -21,12 +21,7 @@
       @if (state.status === 'ready') {
         @switch (activeTab) {
           @case ('predictions') {
-            <app-predictions-tab
-              [matches]="state.data.matches"
-              [predictions]="state.data.predictions"
-              [user]="user"
-              (changed)="reload()"
-            />
+            <app-predictions-tab [matches]="state.data.matches" [predictions]="state.data.predictions" [user]="user" />
           }
           @case ('results') {
             <app-results-tab

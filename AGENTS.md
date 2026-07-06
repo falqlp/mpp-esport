@@ -13,6 +13,14 @@
 - Préférer des entrées/sorties explicites entre composants et éviter les dépendances implicites au composant racine.
 - Avant de terminer une évolution UI, vérifier que le composant modifié reste lisible et n'accumule pas une nouvelle responsabilité indépendante.
 
+## Routage Angular et GitHub Pages
+
+- Utiliser Angular Router pour chaque écran qui doit disposer de sa propre URL, y compris les routes dynamiques comme `user/:id`.
+- Configurer le routeur avec `withHashLocation()` afin que les liens directs et les actualisations fonctionnent sur GitHub Pages.
+- Générer des URLs compatibles avec la forme `https://falqlp.github.io/mpp-esport/#/user/1` et ne pas supposer qu'une réécriture serveur est disponible.
+- Utiliser `routerLink` et les API Angular Router pour la navigation interne plutôt que de construire ou modifier manuellement les URLs.
+- Préserver le préfixe de déploiement `/mpp-esport/` lors des builds GitHub Pages.
+
 ## Internationalisation
 
 - Tout texte visible par l'utilisateur doit toujours être traduit en anglais, français, espagnol, portugais, allemand et italien.

@@ -67,6 +67,10 @@ export class EsportsApiService {
     return this.http.post<Prediction>(`${this.baseUrl}/predictions`, payload);
   }
 
+  deletePrediction(matchId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/predictions/${encodeURIComponent(matchId)}`);
+  }
+
   syncMatches(): Observable<MatchSyncResult> {
     return this.http.post<MatchSyncResult>(`${this.baseUrl}/sync`, {});
   }

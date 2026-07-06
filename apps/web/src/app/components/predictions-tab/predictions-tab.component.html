@@ -5,25 +5,29 @@
       <mat-select [formControl]="filter">
         <mat-option value="favorites">{{ 'common.followedCompetitions' | translate }}</mat-option>
         @for (competition of competitions; track competition.value) {
-          <mat-option [value]="competition.value">{{
-            competition.label | translate: { name: competition.value }
-          }}</mat-option>
+          <mat-option [value]="competition.value">
+            {{ competition.label | translate: { name: competition.value } }}
+          </mat-option>
         }
       </mat-select>
     </mat-form-field>
   </mat-card>
 
   <mat-card appearance="outlined" class="list">
-    <mat-card-header
-      ><mat-card-title-group
-        ><mat-card-subtitle>{{ 'predictions.upcoming' | translate }}</mat-card-subtitle
-        ><mat-card-title>{{ 'predictions.openMatches' | translate }}</mat-card-title
-        ><mat-chip>{{ filtered().length }} {{ 'common.matches' | translate }}</mat-chip></mat-card-title-group
-      ></mat-card-header
-    >
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-subtitle>{{ 'predictions.upcoming' | translate }}</mat-card-subtitle>
+        <mat-card-title>{{ 'predictions.openMatches' | translate }}</mat-card-title>
+        <mat-chip>{{ filtered().length }} {{ 'common.matches' | translate }}</mat-chip>
+      </mat-card-title-group>
+    </mat-card-header>
     <mat-card-content class="matches">
       @for (match of filtered(); track match.id) {
-        <button class="match-row" type="button" [disabled]="match.status === 'live'" (click)="select(match)">
+        <article
+          class="match-row"
+          [class.live-match]="match.status === 'live'"
+          [class.has-score-error]="match.status === 'upcoming' && scoreInvalid(match)"
+        >
           <span class="league">
             <span class="competition">
               @if (match.leagueLogoUrl) {
@@ -35,13 +39,8 @@
               }
             </span>
             <small>{{ match.tournament }} · {{ match.format }}</small>
-            @if (prediction(match.id); as saved) {
-              <em
-                >{{ 'predictions.mine' | translate }} {{ match.teams[0].code }} {{ saved.score[0] }} –
-                {{ saved.score[1] }} {{ match.teams[1].code }}</em
-              >
-            }
           </span>
+
           <span class="teams">
             <span class="team-logo">
               @if (match.teams[0].logoUrl) {
@@ -50,7 +49,26 @@
                 <b>{{ match.teams[0].code }}</b>
               }
             </span>
-            <small>VS</small>
+            @if (match.status === 'upcoming') {
+              <form class="score-form" [formGroup]="scoreForm(match)">
+                <span class="score-fields">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>{{ match.teams[0].code }}</mat-label>
+                    <input matInput type="number" min="0" [max]="wins(match)" formControlName="scoreA" />
+                  </mat-form-field>
+                  <span>–</span>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>{{ match.teams[1].code }}</mat-label>
+                    <input matInput type="number" min="0" [max]="wins(match)" formControlName="scoreB" />
+                  </mat-form-field>
+                </span>
+                @if (scoreInvalid(match)) {
+                  <small class="validation-error">{{ 'predictions.invalidScore' | translate }}</small>
+                }
+              </form>
+            } @else {
+              <small>VS</small>
+            }
             <span class="team-logo">
               @if (match.teams[1].logoUrl) {
                 <img [src]="match.teams[1].logoUrl" [alt]="match.teams[1].name" />
@@ -59,42 +77,38 @@
               }
             </span>
           </span>
-          <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
-        </button>
+
+          <span class="schedule">
+            <span class="schedule-line">
+              <time>{{ match.startsAt | date: 'EEE d MMM, HH:mm' : undefined : i18n.language() }}</time>
+              @if (match.status === 'upcoming' && prediction(match.id)) {
+                <button
+                  class="cancel-prediction"
+                  type="button"
+                  [disabled]="deleting.has(match.id)"
+                  [attr.aria-label]="'predictions.cancel' | translate"
+                  [title]="'predictions.cancel' | translate"
+                  (click)="cancelPrediction(match)"
+                >
+                  ×
+                </button>
+              }
+            </span>
+            @if (match.status === 'upcoming' && saveStatus(match.id) !== 'idle' && !scoreInvalid(match)) {
+              <small class="save-status" [class.error]="saveStatus(match.id) === 'error'">
+                {{
+                  (saveStatus(match.id) === 'saving'
+                    ? 'common.saving'
+                    : saveStatus(match.id) === 'error'
+                      ? 'predictions.error'
+                      : 'predictions.saved'
+                  ) | translate
+                }}
+              </small>
+            }
+          </span>
+        </article>
       }
     </mat-card-content>
-  </mat-card>
-
-  <mat-card appearance="outlined" class="ticket">
-    <mat-card-header
-      ><mat-card-subtitle>{{ 'nav.predictions' | translate }}</mat-card-subtitle
-      ><mat-card-title>{{ 'predictions.ticket' | translate }}</mat-card-title></mat-card-header
-    >
-    <mat-card-content
-      ><form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline"
-          ><mat-label>{{ 'common.match' | translate }}</mat-label
-          ><mat-select formControlName="matchId" (selectionChange)="loadPrediction($event.value)"
-            ><mat-option value="">{{ 'predictions.chooseMatch' | translate }}</mat-option>
-            @for (match of openMatches(); track match.id) {
-              <mat-option [value]="match.id">{{ match.teams[0].code }} vs {{ match.teams[1].code }}</mat-option>
-            }
-          </mat-select></mat-form-field
-        >
-        @if (selectedMatch(); as match) {
-          <mat-form-field appearance="outline"
-            ><mat-label>{{ match.teams[0].name }}</mat-label
-            ><input matInput type="number" min="0" [max]="wins(match)" formControlName="scoreA"
-          /></mat-form-field>
-          <mat-form-field appearance="outline"
-            ><mat-label>{{ match.teams[1].name }}</mat-label
-            ><input matInput type="number" min="0" [max]="wins(match)" formControlName="scoreB"
-          /></mat-form-field>
-        }
-        <button mat-flat-button type="submit" [disabled]="saving">
-          {{ (saving ? 'common.saving' : 'predictions.submit') | translate }}
-        </button>
-      </form></mat-card-content
-    >
   </mat-card>
 </section>
