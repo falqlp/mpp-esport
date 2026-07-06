@@ -40,8 +40,14 @@ jobs:
       - name: Check formatting
         run: yarn format:check
 
-      - name: Test API
-        run: yarn test:api
+      - name: Test API with coverage
+        run: yarn test:api:coverage
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: apps/api/coverage
 
       - name: Build API
         run: yarn build:api
