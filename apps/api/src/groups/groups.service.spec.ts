@@ -57,7 +57,9 @@ describe('GroupsService', () => {
       }),
     );
     expect(result.invitationCode).toBe('ABC12345');
-    expect(result.leaderboard).toEqual([{ userId: 'u1', playerName: 'Leo', points: 0, predictions: 0 }]);
+    expect(result.leaderboard).toEqual([
+      { userId: 'u1', playerName: 'Leo', avatarUrl: null, points: 0, predictions: 0 },
+    ]);
   });
 
   it('searches only public groups and supports a name query', async () => {
@@ -121,7 +123,10 @@ describe('GroupsService', () => {
       invitationCode: 'CODE1234',
       ownerId: 'u1',
       createdAt: new Date(),
-      memberships: [{ user: { id: 'u1', displayName: 'Leo' } }, { user: { id: 'u2', displayName: 'Ana' } }],
+      memberships: [
+        { user: { id: 'u1', displayName: 'Leo', avatarUrl: null } },
+        { user: { id: 'u2', displayName: 'Ana', avatarUrl: 'data:image/jpeg;base64,YQ==' } },
+      ],
     });
     prisma.prediction.groupBy.mockResolvedValue([{ userId: 'u2', _sum: { points: 8 }, _count: { _all: 2 } }]);
     const result = await service.get('g1', 'u1');
@@ -134,6 +139,7 @@ describe('GroupsService', () => {
       }),
     );
     expect(result.leaderboard.map((entry) => entry.playerName)).toEqual(['Ana', 'Leo']);
+    expect(result.leaderboard.map((entry) => entry.avatarUrl)).toEqual(['data:image/jpeg;base64,YQ==', null]);
   });
 
   it('lists only distinct tournaments with future upcoming matches', async () => {

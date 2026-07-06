@@ -19,6 +19,7 @@ export interface GroupSummary {
 export interface GroupLeaderboardEntry {
   userId: string;
   playerName: string;
+  avatarUrl: string | null;
   points: number;
   predictions: number;
 }

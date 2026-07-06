@@ -11,6 +11,9 @@ export interface AuthUser {
   email: string;
   displayName: string;
   favoriteCompetitions: string[];
+  avatarUrl: string | null;
+  bio: string | null;
+  createdAt: Date;
 }
 
 @Injectable()
@@ -83,6 +86,28 @@ export class AuthService {
     return this.toAuthUser(user);
   }
 
+  async updateProfile(userId: string, input: { bio?: unknown; avatarUrl?: unknown }): Promise<AuthUser> {
+    const bio = typeof input.bio === 'string' ? input.bio.trim() : input.bio;
+    if (bio !== undefined && bio !== null && (typeof bio !== 'string' || bio.length > 300)) {
+      throw new BadRequestException('Description invalide');
+    }
+    const avatarUrl = input.avatarUrl;
+    if (
+      avatarUrl !== undefined &&
+      avatarUrl !== null &&
+      (typeof avatarUrl !== 'string' ||
+        avatarUrl.length > 700_000 ||
+        !/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(avatarUrl))
+    ) {
+      throw new BadRequestException('Photo de profil invalide');
+    }
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { bio: bio === undefined ? undefined : bio || null, avatarUrl },
+    });
+    return this.toAuthUser(user);
+  }
+
   private session(user: AuthUser) {
     const payload = Buffer.from(JSON.stringify({ sub: user.id, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 })).toString(
       'base64url',
@@ -95,6 +120,9 @@ export class AuthService {
       email: user.email,
       displayName: user.displayName,
       favoriteCompetitions: user.favoriteCompetitions ?? [],
+      avatarUrl: user.avatarUrl ?? null,
+      bio: user.bio ?? null,
+      createdAt: user.createdAt,
     };
   }
   private sign(payload: string): string {

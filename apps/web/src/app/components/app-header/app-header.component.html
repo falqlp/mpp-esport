@@ -13,10 +13,27 @@
     </nav>
     <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
     <div class="account">
-      <span
-        ><strong>{{ user.displayName }}</strong
-        ><small>{{ user.email }}</small></span
-      ><button mat-stroked-button type="button" (click)="logout.emit()">{{ 'nav.logout' | translate }}</button>
+      <button
+        class="profile-bubble"
+        type="button"
+        [class.active]="activeTab === 'profile' || activeTab === 'preferences'"
+        [attr.aria-label]="'nav.profile' | translate"
+        [attr.title]="user.displayName"
+        [matMenuTriggerFor]="profileMenu"
+      >
+        @if (user.avatarUrl) {
+          <img [src]="user.avatarUrl" alt="" />
+        } @else {
+          {{ profileInitial }}
+        }
+      </button>
+      <mat-menu #profileMenu="matMenu" xPosition="before">
+        <button mat-menu-item type="button" (click)="tabChange.emit('profile')">{{ 'nav.profile' | translate }}</button>
+        <button mat-menu-item type="button" (click)="tabChange.emit('preferences')">
+          {{ 'nav.preferences' | translate }}
+        </button>
+        <button mat-menu-item type="button" (click)="logout.emit()">{{ 'nav.logout' | translate }}</button>
+      </mat-menu>
     </div>
   }
   <mat-select

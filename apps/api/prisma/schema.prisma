@@ -13,6 +13,8 @@ model User {
   displayName  String
   passwordHash String
   favoriteCompetitions String[] @default([])
+  avatarUrl     String?  @db.Text
+  bio           String?  @db.VarChar(300)
   createdAt    DateTime @default(now())
   predictions  Prediction[]
   ownedGroups  Group[] @relation("GroupOwner")

@@ -9,6 +9,9 @@ export interface AuthUser {
   email: string;
   displayName: string;
   favoriteCompetitions: CompetitionKey[];
+  avatarUrl: string | null;
+  bio: string | null;
+  createdAt: string;
 }
 interface AuthSession {
   token: string;
@@ -43,6 +46,9 @@ export class AuthService {
     return this.http
       .put<AuthUser>(`${this.baseUrl}/me/favorite-competitions`, { favoriteCompetitions })
       .pipe(tap((user) => this.saveUser(user)));
+  }
+  updateProfile(profile: { bio: string | null; avatarUrl: string | null }): Observable<AuthUser> {
+    return this.http.put<AuthUser>(`${this.baseUrl}/me/profile`, profile).pipe(tap((user) => this.saveUser(user)));
   }
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);

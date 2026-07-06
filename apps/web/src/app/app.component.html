@@ -1,7 +1,7 @@
 <main class="shell">
   <app-server-startup-notice />
   @if (user$ | async; as user) {
-    <app-header [user]="user" [activeTab]="activeTab" (tabChange)="activeTab = $event" (logout)="logout()" />
+    <app-header [user]="user" [activeTab]="activeTab" (tabChange)="selectTab($event)" (logout)="logout()" />
     @if (isMemberPage()) {
       <router-outlet />
     } @else if (state$ | async; as state) {
@@ -36,6 +36,9 @@
             <app-groups-tab [userId]="user.id" />
           }
           @case ('profile') {
+            <app-user-profile [user]="user" />
+          }
+          @case ('preferences') {
             <app-profile-tab [user]="user" (saved)="reload()" />
           }
         }

@@ -22,4 +22,12 @@ export class AuthController {
     const user = this.auth.requireUser(await this.auth.authenticate(authorization));
     return this.auth.updateFavoriteCompetitions(user.id, body.favoriteCompetitions);
   }
+
+  @Put('me/profile') async updateProfile(
+    @Body() body: { bio?: unknown; avatarUrl?: unknown },
+    @Headers('authorization') authorization?: string,
+  ) {
+    const user = this.auth.requireUser(await this.auth.authenticate(authorization));
+    return this.auth.updateProfile(user.id, body);
+  }
 }

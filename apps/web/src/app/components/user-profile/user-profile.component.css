@@ -1,0 +1,62 @@
+mat-card-header {
+  margin-bottom: 18px;
+}
+.profile-layout {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 180px minmax(0, 1fr);
+}
+.photo-section {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+.avatar-preview {
+  align-items: center;
+  background: var(--mat-sys-primary-container);
+  border-radius: 50%;
+  color: var(--mat-sys-on-primary-container);
+  display: flex;
+  font-size: 54px;
+  font-weight: 800;
+  height: 144px;
+  justify-content: center;
+  margin-bottom: 6px;
+  overflow: hidden;
+  width: 144px;
+}
+.avatar-preview img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+.file-input {
+  display: none;
+}
+.photo-section small,
+.member-since {
+  color: var(--mat-sys-on-surface-variant);
+}
+.details,
+mat-form-field {
+  width: 100%;
+}
+.bio-field {
+  display: block;
+}
+.bio-field textarea[matInput] {
+  max-height: 220px;
+  min-height: 100px;
+  resize: vertical;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+@media (max-width: 680px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}

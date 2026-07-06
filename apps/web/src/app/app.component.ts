@@ -1,6 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../services/auth.service';
@@ -10,9 +11,11 @@ import { AuthPageComponent } from './components/auth-page/auth-page.component';
 import { GroupsTabComponent } from './components/groups-tab/groups-tab.component';
 import { PredictionsTabComponent } from './components/predictions-tab/predictions-tab.component';
 import { ProfileTabComponent } from './components/profile-tab/profile-tab.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { ResultsTabComponent } from './components/results-tab/results-tab.component';
 import { ServerStartupNoticeComponent } from './components/server-startup-notice/server-startup-notice.component';
 import { TranslatePipe } from './i18n/translate.pipe';
+import { mainTabFromUrl, routeForMainTab } from './app-navigation';
 
 @Component({
   selector: 'app-root',
@@ -26,6 +29,7 @@ import { TranslatePipe } from './i18n/translate.pipe';
     GroupsTabComponent,
     PredictionsTabComponent,
     ProfileTabComponent,
+    UserProfileComponent,
     ResultsTabComponent,
     ServerStartupNoticeComponent,
     TranslatePipe,
@@ -41,14 +45,27 @@ export class AppComponent {
   readonly user$ = this.auth.user$;
   readonly state$ = this.data.state$;
   activeTab: AppTab = 'predictions';
+
+  constructor() {
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
+      const tab = mainTabFromUrl(event.urlAfterRedirects);
+      if (tab) this.activeTab = tab;
+    });
+  }
+
   isMemberPage(): boolean {
     return this.router.url.startsWith('/user/');
+  }
+  selectTab(tab: AppTab): void {
+    this.activeTab = tab;
+    void this.router.navigateByUrl(routeForMainTab(tab));
   }
   reload(): void {
     this.data.reload();
   }
   logout(): void {
     this.activeTab = 'predictions';
+    void this.router.navigateByUrl(routeForMainTab('predictions'));
     this.auth.logout();
     this.data.reload();
   }

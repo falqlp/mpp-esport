@@ -9,6 +9,8 @@ const user = {
   displayName: 'Leo',
   passwordHash: '',
   favoriteCompetitions: ['LEC'],
+  avatarUrl: null,
+  bio: null,
   createdAt: new Date(),
 };
 function setup() {
@@ -100,6 +102,9 @@ describe('AuthService', () => {
       email: user.email,
       displayName: user.displayName,
       favoriteCompetitions: user.favoriteCompetitions,
+      avatarUrl: null,
+      bio: null,
+      createdAt: user.createdAt,
     });
     expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: user.id } });
   });
@@ -152,5 +157,26 @@ describe('AuthService', () => {
     await expect(service.updateFavoriteCompetitions('u1', ['INVALID'])).rejects.toBeInstanceOf(BadRequestException);
     await expect(service.updateFavoriteCompetitions('u1', [1])).rejects.toBeInstanceOf(BadRequestException);
     await expect(service.updateFavoriteCompetitions('u1', undefined)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('validates and persists editable profile information', async () => {
+    const { service, prisma } = setup();
+    prisma.user.update.mockResolvedValue({ ...user, bio: 'Fan de la LEC' });
+
+    await expect(service.updateProfile('u1', { bio: '  Fan de la LEC  ', avatarUrl: null })).resolves.toEqual(
+      expect.objectContaining({ bio: 'Fan de la LEC', avatarUrl: null }),
+    );
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: { bio: 'Fan de la LEC', avatarUrl: null },
+    });
+  });
+
+  it('rejects an invalid bio or profile picture', async () => {
+    const { service } = setup();
+    await expect(service.updateProfile('u1', { bio: 'x'.repeat(301) })).rejects.toBeInstanceOf(BadRequestException);
+    await expect(service.updateProfile('u1', { avatarUrl: 'https://example.com/photo.jpg' })).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
   });
 });

@@ -1,0 +1,47 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-subtitle>{{ 'profile.mine' | translate }}</mat-card-subtitle>
+    <mat-card-title>{{ user.displayName }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="profile-layout">
+      <div class="photo-section">
+        <div class="avatar-preview">
+          @if (avatarUrl(); as previewUrl) {
+            <img [src]="previewUrl" [alt]="'profile.photoAlt' | translate" />
+          } @else {
+            <span aria-hidden="true">{{ user.displayName.charAt(0).toLocaleUpperCase() }}</span>
+          }
+        </div>
+        <input
+          #photoInput
+          class="file-input"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="selectPhoto($event)"
+        />
+        <button mat-stroked-button type="button" (click)="photoInput.click()">
+          {{ 'profile.changePhoto' | translate }}
+        </button>
+        @if (avatarUrl()) {
+          <button mat-button type="button" (click)="removePhoto()">{{ 'profile.removePhoto' | translate }}</button>
+        }
+        <small>{{ 'profile.photoHint' | translate }}</small>
+      </div>
+
+      <div class="details">
+        <p class="member-since">{{ 'profile.memberSince' | translate: { date: memberSince } }}</p>
+        <mat-form-field class="bio-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'profile.bio' | translate }}</mat-label>
+          <textarea matInput rows="5" maxlength="300" [formControl]="bio"></textarea>
+          <mat-hint align="end">{{ bio.value.length }}/300</mat-hint>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="button" [disabled]="saving" (click)="save()">
+            <span>{{ saveLabel | translate }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

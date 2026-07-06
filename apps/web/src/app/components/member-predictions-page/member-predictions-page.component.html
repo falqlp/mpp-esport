@@ -1,5 +1,5 @@
 <section class="history-page">
-  <a mat-stroked-button routerLink="/">{{ 'memberHistory.back' | translate }}</a>
+  <a mat-stroked-button routerLink="/groups">{{ 'memberHistory.back' | translate }}</a>
 
   @if (state$ | async; as state) {
     @if (state.status === 'loading') {

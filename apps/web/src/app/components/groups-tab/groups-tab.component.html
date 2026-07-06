@@ -143,7 +143,14 @@
               <mat-list-item>
                 <span matListItemIcon class="rank">{{ rank + 1 }}</span>
                 <a matListItemTitle class="player-link" [routerLink]="['/user', player.userId]">
-                  {{ player.playerName }}
+                  <span class="player-avatar" aria-hidden="true">
+                    @if (player.avatarUrl) {
+                      <img [src]="player.avatarUrl" alt="" />
+                    } @else {
+                      {{ player.playerName.charAt(0).toLocaleUpperCase() }}
+                    }
+                  </span>
+                  <span>{{ player.playerName }}</span>
                 </a>
                 <span matListItemMeta>{{ player.points }} {{ 'common.points' | translate }}</span>
               </mat-list-item>

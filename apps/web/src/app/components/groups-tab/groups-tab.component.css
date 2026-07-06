@@ -199,6 +199,25 @@ mat-card-content {
 .rank {
   font-weight: 800;
 }
+.player-avatar {
+  align-items: center;
+  background: var(--mat-sys-primary-container);
+  border-radius: 50%;
+  color: var(--mat-sys-on-primary-container);
+  display: inline-flex;
+  flex: 0 0 36px;
+  font-size: 14px;
+  font-weight: 800;
+  height: 36px;
+  justify-content: center;
+  overflow: hidden;
+  width: 36px;
+}
+.player-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
 .code {
   font-family: ui-monospace, monospace !important;
   letter-spacing: 0.12em;
@@ -217,7 +236,10 @@ mat-card-content {
   }
 }
 .player-link {
+  align-items: center;
   color: inherit;
+  display: inline-flex;
+  gap: 12px;
   font-weight: 700;
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);

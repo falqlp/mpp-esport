@@ -3,7 +3,9 @@ import { Prisma } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma.service';
 
-const groupInclude = { memberships: { include: { user: { select: { id: true, displayName: true } } } } } as const;
+const groupInclude = {
+  memberships: { include: { user: { select: { id: true, displayName: true, avatarUrl: true } } } },
+} as const;
 type GroupWithMembers = Prisma.GroupGetPayload<{ include: typeof groupInclude }>;
 
 @Injectable()
@@ -106,6 +108,7 @@ export class GroupsService {
       .map(({ user }) => ({
         userId: user.id,
         playerName: user.displayName,
+        avatarUrl: user.avatarUrl ?? null,
         points: byUser.get(user.id)?._sum.points ?? 0,
         predictions: byUser.get(user.id)?._count._all ?? 0,
       }))

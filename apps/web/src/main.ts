@@ -20,6 +20,18 @@ registerLocaleData(localeIt);
 bootstrapApplication(AppComponent, {
   providers: [
     provideHttpClient(withInterceptors([authInterceptor])),
-    provideRouter([{ path: 'user/:id', component: MemberPredictionsPageComponent }], withHashLocation()),
+    provideRouter(
+      [
+        { path: '', pathMatch: 'full', redirectTo: 'predictions' },
+        { path: 'predictions', children: [] },
+        { path: 'results', children: [] },
+        { path: 'groups', children: [] },
+        { path: 'profile', children: [] },
+        { path: 'preferences', children: [] },
+        { path: 'user/:id', component: MemberPredictionsPageComponent },
+        { path: '**', redirectTo: 'predictions' },
+      ],
+      withHashLocation(),
+    ),
   ],
 }).catch((error: unknown) => console.error('Unable to start the application', error));
