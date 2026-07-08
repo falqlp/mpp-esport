@@ -95,7 +95,10 @@ export class PandaScoreService {
     const tournament = this.pandaId(tournamentId);
     const team = this.pandaId(teamId);
     if (!tournament || !team) return [];
-    const rosters = (await this.request<{ rosters: PandaRoster[] }>(`/tournaments/${tournament}/rosters`)).rosters;
+    const response = await this.request<PandaRoster[] | { rosters: PandaRoster[] }>(
+      `/tournaments/${tournament}/rosters`,
+    );
+    const rosters = Array.isArray(response) ? response : response.rosters;
     const roster = rosters.find((candidate) => candidate.team?.id === Number(team));
     return (roster?.players ?? []).map((player) => this.toRosterPlayer(player));
   }

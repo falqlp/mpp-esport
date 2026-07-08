@@ -82,6 +82,40 @@ describe('PandaScoreService', () => {
     ]);
   });
 
+  it('accepts a wrapped tournament roster response', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            rosters: [
+              {
+                team: { id: 10 },
+                players: [
+                  {
+                    id: 9,
+                    name: 'Nine',
+                    first_name: null,
+                    last_name: null,
+                    role: null,
+                    nationality: null,
+                    image_url: null,
+                  },
+                ],
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    await expect(new PandaScoreService().getTournamentRoster('pandascore-100', 'pandascore-10')).resolves.toEqual([
+      { id: 'pandascore-9', nickname: 'Nine' },
+    ]);
+  });
+
   it('loads team players as a fallback source', async () => {
     process.env.PANDASCORE_API_TOKEN = 'token';
     vi.stubGlobal(
