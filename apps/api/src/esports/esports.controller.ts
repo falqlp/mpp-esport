@@ -3,6 +3,7 @@ import { AuthService } from '../auth/auth.service';
 import { CreatePredictionDto } from './esports.types';
 import { EsportsService } from './esports.service';
 import { MatchSyncService } from './match-sync.service';
+import { TeamRosterService } from './team-roster.service';
 
 @Controller('esports')
 export class EsportsController {
@@ -10,11 +11,17 @@ export class EsportsController {
     private readonly esportsService: EsportsService,
     private readonly matchSyncService: MatchSyncService,
     private readonly auth: AuthService,
+    private readonly teamRosterService: TeamRosterService,
   ) {}
 
   @Get('matches')
   getMatches() {
     return this.esportsService.getMatches();
+  }
+
+  @Get('teams/:teamId/roster')
+  getTeamRoster(@Param('teamId') teamId: string) {
+    return this.teamRosterService.getRoster(teamId);
   }
 
   @Get('predictions')

@@ -1,0 +1,50 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>{{ 'team.roster' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (state$ | async; as state) {
+      @if (state.loading) {
+        <p>{{ 'team.rosterLoading' | translate }}</p>
+      } @else {
+        <div class="roster">
+          @for (player of state.players; track player.id) {
+            <article class="player">
+              @if (player.imageUrl) {
+                <img
+                  class="photo"
+                  [src]="player.imageUrl"
+                  [alt]="'team.playerPhoto' | translate: { name: player.nickname }"
+                />
+              } @else {
+                <div class="photo-placeholder" aria-hidden="true">{{ player.nickname.slice(0, 1) }}</div>
+              }
+              <div class="player-details">
+                <h3>{{ player.nickname }}</h3>
+                @if (player.firstName || player.lastName) {
+                  <p>{{ player.firstName }} {{ player.lastName }}</p>
+                }
+                @if (player.role || player.nationality) {
+                  <div class="player-meta">
+                    @if (player.role) {
+                      <img class="role-icon" [src]="roleIcon(player.role)" [alt]="roleLabel(player.role)" />
+                    }
+                    @if (player.nationality) {
+                      <img
+                        class="nationality-icon"
+                        [src]="getNationalityFlagUrl(player.nationality)"
+                        [alt]="'team.nationalityFlag' | translate: { nationality: player.nationality }"
+                      />
+                    }
+                  </div>
+                }
+              </div>
+            </article>
+          } @empty {
+            <p>{{ 'team.rosterUnavailable' | translate }}</p>
+          }
+        </div>
+      }
+    }
+  </mat-card-content>
+</mat-card>

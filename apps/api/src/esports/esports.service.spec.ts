@@ -9,6 +9,7 @@ const match = (extra = {}) => ({
   id: 'm1',
   league: 'LEC',
   tournament: 'Spring',
+  tournamentId: 'pandascore-100',
   startsAt: new Date(Date.now() + 60_000),
   format: 'BO3',
   status: 'upcoming',

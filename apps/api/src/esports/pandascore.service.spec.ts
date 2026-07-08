@@ -10,7 +10,7 @@ const panda = {
   winner_id: 10,
   league: { name: 'LEC', image_url: 'https://x/lec.png' },
   serie: { full_name: 'Spring', name: 'Spring' },
-  tournament: { name: 'T' },
+  tournament: { id: 100, name: 'T' },
   opponents: [
     { opponent: { id: 10, name: 'Alpha', acronym: 'ALP', image_url: 'https://x/logo.png' } },
     { opponent: { id: 20, name: 'Beta', acronym: null, image_url: null } },
@@ -49,6 +49,66 @@ describe('PandaScoreService', () => {
     vi.stubGlobal('fetch', fetchMock);
     expect(await new PandaScoreService().getMatch('bad')).toBeUndefined();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('loads tournament rosters first and maps all available player fields', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    const player = {
+      id: 7,
+      name: 'Seven',
+      first_name: 'Se',
+      last_name: 'Ven',
+      role: 'mid',
+      nationality: 'FR',
+      image_url: 'https://x/player.png',
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify([{ team: { id: 10 }, players: [player] }]), { status: 200 })),
+    );
+
+    await expect(new PandaScoreService().getTournamentRoster('pandascore-100', 'pandascore-10')).resolves.toEqual([
+      {
+        id: 'pandascore-7',
+        nickname: 'Seven',
+        firstName: 'Se',
+        lastName: 'Ven',
+        role: 'mid',
+        nationality: 'FR',
+        imageUrl: 'https://x/player.png',
+      },
+    ]);
+  });
+
+  it('loads team players as a fallback source', async () => {
+    process.env.PANDASCORE_API_TOKEN = 'token';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            id: 10,
+            players: [
+              {
+                id: 8,
+                name: 'Eight',
+                first_name: null,
+                last_name: null,
+                role: null,
+                nationality: null,
+                image_url: null,
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+    await expect(new PandaScoreService().getTeamRoster('pandascore-10')).resolves.toEqual([
+      { id: 'pandascore-8', nickname: 'Eight' },
+    ]);
   });
 
   it('loads all feeds, paginates, caches results, and supports forced refresh', async () => {
@@ -138,7 +198,7 @@ describe('PandaScoreService', () => {
       winner_id: null,
       league: { name: 'LCK', image_url: null },
       serie: null,
-      tournament: { name: 'Playoffs' },
+      tournament: { id: 101, name: 'Playoffs' },
       opponents: [
         { opponent: { id: -1, name: 'Gamma', acronym: '', image_url: 'logo.png' } },
         { opponent: { id: 2, name: 'Delta', acronym: 'DEL', image_url: null } },

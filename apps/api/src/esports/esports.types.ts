@@ -13,6 +13,7 @@ export interface LolMatch {
   league: string;
   leagueLogoUrl?: string;
   tournament: string;
+  tournamentId: string;
   startsAt: string;
   format: 'BO1' | 'BO3' | 'BO5';
   status: MatchStatus;
@@ -21,6 +22,24 @@ export interface LolMatch {
     winnerId: string;
     score: [number, number];
   };
+}
+
+export interface TeamRosterPlayer {
+  id: string;
+  nickname: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  nationality?: string;
+  imageUrl?: string;
+  substitute?: boolean;
+}
+
+export interface TeamRoster {
+  teamId: string;
+  tournamentId?: string;
+  source: 'tournament' | 'team';
+  players: TeamRosterPlayer[];
 }
 
 export interface Prediction {

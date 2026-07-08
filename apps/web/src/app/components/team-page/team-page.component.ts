@@ -9,11 +9,12 @@ import { LolMatch, Team } from '../../../services/esports-api.service';
 import { I18nService } from '../../i18n/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { buildTeamPage } from './team-page.view-model';
+import { TeamRosterComponent } from '../team-roster/team-roster.component';
 
 @Component({
   selector: 'app-team-page',
   standalone: true,
-  imports: [AsyncPipe, DatePipe, MatButtonModule, MatCardModule, RouterLink, TranslatePipe],
+  imports: [AsyncPipe, DatePipe, MatButtonModule, MatCardModule, RouterLink, TeamRosterComponent, TranslatePipe],
   templateUrl: './team-page.component.html',
   styleUrl: './team-page.component.css',
 })

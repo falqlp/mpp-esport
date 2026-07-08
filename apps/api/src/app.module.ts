@@ -8,9 +8,18 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { GroupsController } from './groups/groups.controller';
 import { GroupsService } from './groups/groups.service';
+import { TeamRosterService } from './esports/team-roster.service';
 
 @Module({
   controllers: [AuthController, EsportsController, GroupsController],
-  providers: [EsportsService, MatchSyncService, PandaScoreService, PrismaService, AuthService, GroupsService],
+  providers: [
+    EsportsService,
+    MatchSyncService,
+    PandaScoreService,
+    TeamRosterService,
+    PrismaService,
+    AuthService,
+    GroupsService,
+  ],
 })
 export class AppModule {}

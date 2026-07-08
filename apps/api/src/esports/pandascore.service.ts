@@ -1,11 +1,27 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
-import { LolMatch, MatchStatus, Team } from './esports.types';
+import { LolMatch, MatchStatus, Team, TeamRosterPlayer } from './esports.types';
 
 interface PandaTeam {
   id: number;
   name: string;
   acronym: string | null;
   image_url: string | null;
+  players?: PandaPlayer[];
+}
+
+interface PandaPlayer {
+  id: number;
+  name: string;
+  first_name: string | null;
+  last_name: string | null;
+  role: string | null;
+  nationality: string | null;
+  image_url: string | null;
+}
+
+interface PandaRoster {
+  team: PandaTeam;
+  players: PandaPlayer[];
 }
 
 interface PandaMatch {
@@ -17,7 +33,7 @@ interface PandaMatch {
   winner_id: number | null;
   league: { name: string; image_url: string | null };
   serie: { full_name: string | null; name: string | null } | null;
-  tournament: { name: string };
+  tournament: { id: number; name: string };
   opponents: Array<{ opponent: PandaTeam }>;
   results: Array<{ team_id: number; score: number }>;
 }
@@ -73,6 +89,22 @@ export class PandaScoreService {
     if (!/^\d+$/.test(pandaId)) return undefined;
     const match = await this.request<PandaMatch>(`/matches/${pandaId}`);
     return this.toLolMatch(match);
+  }
+
+  async getTournamentRoster(tournamentId: string, teamId: string): Promise<TeamRosterPlayer[]> {
+    const tournament = this.pandaId(tournamentId);
+    const team = this.pandaId(teamId);
+    if (!tournament || !team) return [];
+    const rosters = (await this.request<{ rosters: PandaRoster[] }>(`/tournaments/${tournament}/rosters`)).rosters;
+    const roster = rosters.find((candidate) => candidate.team?.id === Number(team));
+    return (roster?.players ?? []).map((player) => this.toRosterPlayer(player));
+  }
+
+  async getTeamRoster(teamId: string): Promise<TeamRosterPlayer[]> {
+    const team = this.pandaId(teamId);
+    if (!team) return [];
+    const result = await this.request<PandaTeam>(`/teams/${team}`);
+    return (result.players ?? []).map((player) => this.toRosterPlayer(player));
   }
 
   private async fetchAllPages(path: string, sort: string): Promise<PandaMatch[]> {
@@ -153,6 +185,7 @@ export class PandaScoreService {
       league: match.league.name,
       ...(match.league.image_url ? { leagueLogoUrl: match.league.image_url } : {}),
       tournament: match.serie?.full_name ?? match.serie?.name ?? match.tournament.name,
+      tournamentId: `pandascore-${match.tournament.id}`,
       startsAt: match.scheduled_at,
       format: match.number_of_games === 5 ? 'BO5' : match.number_of_games === 3 ? 'BO3' : 'BO1',
       status,
@@ -165,6 +198,23 @@ export class PandaScoreService {
             },
           }
         : {}),
+    };
+  }
+
+  private pandaId(id: string): string | undefined {
+    const value = id.replace(/^pandascore-/, '');
+    return /^\d+$/.test(value) ? value : undefined;
+  }
+
+  private toRosterPlayer(player: PandaPlayer): TeamRosterPlayer {
+    return {
+      id: `pandascore-${player.id}`,
+      nickname: player.name,
+      ...(player.first_name ? { firstName: player.first_name } : {}),
+      ...(player.last_name ? { lastName: player.last_name } : {}),
+      ...(player.role ? { role: player.role } : {}),
+      ...(player.nationality ? { nationality: player.nationality } : {}),
+      ...(player.image_url ? { imageUrl: player.image_url } : {}),
     };
   }
 

@@ -86,17 +86,34 @@ export class MatchSyncService {
       const batchStartedAt = Date.now();
       const batchNumber = Math.floor(index / 100) + 1;
       this.logger.log(`Lot ${batchNumber} : écriture de ${batch.length} matchs…`);
-      await this.prisma.$transaction(
-        batch.map((match) => {
+      const tournaments = new Map(batch.map((match) => [match.tournamentId, match.tournament]));
+      const teams = new Map(batch.flatMap((match) => match.teams.map((team) => [team.id, team] as const)));
+      await this.prisma.$transaction([
+        ...[...tournaments].map(([id, name]) =>
+          this.prisma.tournament.upsert({ where: { id }, create: { id, name }, update: { name } }),
+        ),
+        ...[...teams.values()].map((team) =>
+          this.prisma.team.upsert({
+            where: { id: team.id },
+            create: { id: team.id, name: team.name, acronym: team.code, imageUrl: team.logoUrl ?? null },
+            update: { name: team.name, acronym: team.code, imageUrl: team.logoUrl ?? null },
+          }),
+        ),
+        ...batch.map((match) => {
           if (match.result) resultsSynced += 1;
           const data = this.toDatabaseMatch(match);
-          return this.prisma.match.upsert({
-            where: { id: match.id },
-            create: data,
-            update: data,
-          });
+          return this.prisma.match.upsert({ where: { id: match.id }, create: data, update: data });
         }),
-      );
+        ...batch.flatMap((match) =>
+          match.teams.map((team, position) =>
+            this.prisma.matchTeam.upsert({
+              where: { matchId_teamId: { matchId: match.id, teamId: team.id } },
+              create: { matchId: match.id, teamId: team.id, position },
+              update: { position },
+            }),
+          ),
+        ),
+      ]);
       this.logger.log(`Lot ${batchNumber} terminé en ${Date.now() - batchStartedAt}ms`);
     }
 
@@ -116,6 +133,7 @@ export class MatchSyncService {
       league: match.league,
       leagueLogoUrl: match.leagueLogoUrl ?? null,
       tournament: match.tournament,
+      tournamentId: match.tournamentId,
       startsAt: new Date(match.startsAt),
       format: match.format,
       status: match.status,

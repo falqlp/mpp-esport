@@ -5,6 +5,7 @@ const finished = {
   id: 'm1',
   league: 'LEC',
   tournament: 'Spring',
+  tournamentId: 'pandascore-100',
   startsAt: '2026-01-01T00:00:00Z',
   format: 'BO3' as const,
   status: 'finished' as const,
@@ -22,6 +23,9 @@ describe('MatchSyncService', () => {
     const prisma = {
       syncRequest: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue({}) },
       match: { upsert: vi.fn().mockReturnValue(operation) },
+      tournament: { upsert: vi.fn().mockReturnValue(operation) },
+      team: { upsert: vi.fn().mockReturnValue(operation) },
+      matchTeam: { upsert: vi.fn().mockReturnValue(operation) },
       prediction: {
         findMany: vi.fn().mockResolvedValue([{ id: 'p', scoreA: 2, scoreB: 1 }]),
         update: vi.fn().mockResolvedValue({}),
@@ -42,6 +46,9 @@ describe('MatchSyncService', () => {
     const prisma = {
       syncRequest: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue({}) },
       match: { upsert: vi.fn() },
+      tournament: { upsert: vi.fn() },
+      team: { upsert: vi.fn() },
+      matchTeam: { upsert: vi.fn() },
       prediction: { findMany: vi.fn() },
       $transaction: vi.fn(),
     };

@@ -1,0 +1,70 @@
+mat-card-content {
+  padding-top: 12px;
+}
+
+.roster {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.player {
+  align-items: center;
+  background: var(--mat-sys-surface-container-low);
+  border-radius: 12px;
+  display: flex;
+  gap: 14px;
+  min-height: 96px;
+  padding: 12px;
+}
+
+.player .photo,
+.photo-placeholder {
+  border-radius: 50%;
+  height: 72px;
+  object-fit: cover;
+  width: 72px;
+}
+
+.nationality-icon {
+  height: 20px;
+  object-fit: contain;
+  width: 28px;
+}
+
+.role-icon {
+  height: 24px;
+  object-fit: contain;
+  width: 24px;
+}
+
+.player-meta {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  min-height: 24px;
+}
+
+.photo-placeholder {
+  align-items: center;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  display: flex;
+  font-size: 1.75rem;
+  justify-content: center;
+}
+
+.player-details {
+  display: grid;
+  gap: 3px;
+}
+
+.player-details h3,
+.player-details p {
+  margin: 0;
+}
+
+.player-details small {
+  color: var(--mat-sys-on-surface-variant);
+}
