@@ -43,8 +43,7 @@ export class EsportsController {
   }
 
   @Post('sync')
-  async syncMatches(@Headers('authorization') authorization?: string) {
-    this.auth.requireUser(await this.auth.authenticate(authorization));
+  syncMatches() {
     return this.matchSyncService.sync();
   }
 
