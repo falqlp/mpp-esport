@@ -25,7 +25,7 @@ describe('MatchSyncService', () => {
       match: { upsert: vi.fn().mockReturnValue(operation) },
       tournament: { upsert: vi.fn().mockReturnValue(operation) },
       team: { upsert: vi.fn().mockReturnValue(operation) },
-      matchTeam: { upsert: vi.fn().mockReturnValue(operation) },
+      matchTeam: { createMany: vi.fn().mockReturnValue(operation), deleteMany: vi.fn().mockReturnValue(operation) },
       prediction: {
         findMany: vi.fn().mockResolvedValue([{ id: 'p', scoreA: 2, scoreB: 1 }]),
         update: vi.fn().mockResolvedValue({}),
@@ -39,6 +39,14 @@ describe('MatchSyncService', () => {
     expect(prisma.syncRequest.upsert).toHaveBeenCalledWith(
       expect.objectContaining({ create: { id: 'pandascore', requestedAt: new Date('2026-01-01T12:00:00Z') } }),
     );
+    expect(prisma.matchTeam.deleteMany).toHaveBeenCalledWith({ where: { matchId: { in: ['m1'] } } });
+    expect(prisma.matchTeam.createMany).toHaveBeenCalledWith({
+      data: [
+        { matchId: 'm1', teamId: 'a', position: 0 },
+        { matchId: 'm1', teamId: 'b', position: 1 },
+      ],
+      skipDuplicates: true,
+    });
   });
   it('deduplicates concurrent synchronizations', async () => {
     let resolve!: (value: never[]) => void;
@@ -48,7 +56,7 @@ describe('MatchSyncService', () => {
       match: { upsert: vi.fn() },
       tournament: { upsert: vi.fn() },
       team: { upsert: vi.fn() },
-      matchTeam: { upsert: vi.fn() },
+      matchTeam: { createMany: vi.fn(), deleteMany: vi.fn() },
       prediction: { findMany: vi.fn() },
       $transaction: vi.fn(),
     };

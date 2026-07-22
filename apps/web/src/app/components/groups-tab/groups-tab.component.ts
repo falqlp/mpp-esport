@@ -140,13 +140,14 @@ export class GroupsTabComponent implements OnInit {
   async copyInvitationLink(group: GroupDetails): Promise<void> {
     const link = this.invitationLink(group);
     if (!link) return;
+    const message = this.i18n.translate('groups.invitationClipboardMessage', { group: group.name, link });
     try {
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(message);
       this.snackBar.open(this.i18n.translate('groups.invitationLinkCopied'), this.i18n.translate('common.close'), {
         duration: 3000,
       });
     } catch {
-      this.snackBar.open(link, this.i18n.translate('common.close'), { duration: 8000 });
+      this.snackBar.open(message, this.i18n.translate('common.close'), { duration: 8000 });
     }
   }
   deleteSelected(): void {

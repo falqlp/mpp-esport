@@ -88,6 +88,9 @@ export class MatchSyncService {
       this.logger.log(`Lot ${batchNumber} : écriture de ${batch.length} matchs…`);
       const tournaments = new Map(batch.map((match) => [match.tournamentId, match.tournament]));
       const teams = new Map(batch.flatMap((match) => match.teams.map((team) => [team.id, team] as const)));
+      const matchTeamLinks = batch.flatMap((match) =>
+        match.teams.map((team, position) => ({ matchId: match.id, teamId: team.id, position })),
+      );
       await this.prisma.$transaction([
         ...[...tournaments].map(([id, name]) =>
           this.prisma.tournament.upsert({ where: { id }, create: { id, name }, update: { name } }),
@@ -104,15 +107,8 @@ export class MatchSyncService {
           const data = this.toDatabaseMatch(match);
           return this.prisma.match.upsert({ where: { id: match.id }, create: data, update: data });
         }),
-        ...batch.flatMap((match) =>
-          match.teams.map((team, position) =>
-            this.prisma.matchTeam.upsert({
-              where: { matchId_teamId: { matchId: match.id, teamId: team.id } },
-              create: { matchId: match.id, teamId: team.id, position },
-              update: { position },
-            }),
-          ),
-        ),
+        this.prisma.matchTeam.deleteMany({ where: { matchId: { in: batch.map((match) => match.id) } } }),
+        this.prisma.matchTeam.createMany({ data: matchTeamLinks, skipDuplicates: true }),
       ]);
       this.logger.log(`Lot ${batchNumber} terminé en ${Date.now() - batchStartedAt}ms`);
     }
