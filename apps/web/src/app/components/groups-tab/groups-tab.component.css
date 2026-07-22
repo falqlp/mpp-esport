@@ -57,13 +57,31 @@
   display: flex;
   gap: 8px;
 }
-.invitation-code {
+.invitation-panel {
+  align-items: center;
   background: var(--mat-sys-surface-container);
   border-radius: 12px;
-  display: inline-flex;
-  gap: 8px;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
   margin: 4px 0 18px;
-  padding: 10px 14px;
+  padding: 12px 14px;
+}
+.invitation-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.invitation-copy span {
+  font-weight: 700;
+}
+.invitation-copy small {
+  color: var(--mat-sys-on-surface-variant);
+}
+.invitation-url {
+  font-family: ui-monospace, monospace !important;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 mat-card-content {
   padding-top: 16px;
@@ -233,6 +251,10 @@ mat-card-content {
   .search {
     align-items: stretch;
     flex-direction: column;
+  }
+  .invitation-panel {
+    align-items: stretch;
+    display: grid;
   }
 }
 .player-link {

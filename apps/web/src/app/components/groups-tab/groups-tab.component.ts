@@ -9,7 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import {
   AvailableGroupCompetition,
@@ -19,6 +19,7 @@ import {
 } from '../../../services/groups-api.service';
 import { I18nService } from '../../i18n/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
+import { buildGroupInvitationLink } from './group-invitation-link';
 
 @Component({
   selector: 'app-groups-tab',
@@ -42,6 +43,7 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
 })
 export class GroupsTabComponent implements OnInit {
   private readonly api = inject(GroupsApiService);
+  private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly i18n = inject(I18nService);
   readonly competitions = signal<AvailableGroupCompetition[]>([]);
@@ -63,6 +65,8 @@ export class GroupsTabComponent implements OnInit {
   @Input({ required: true }) userId = '';
 
   ngOnInit(): void {
+    const invitationCode = this.route.snapshot.queryParamMap.get('invite');
+    if (invitationCode) this.code.setValue(invitationCode);
     this.loadMine();
     this.searchPublic();
     this.loadCompetitions();
@@ -128,6 +132,22 @@ export class GroupsTabComponent implements OnInit {
   }
   joinPublic(id: string): void {
     this.join(this.api.joinPublic(id));
+  }
+  invitationLink(group: GroupDetails): string {
+    if (!group.invitationCode) return '';
+    return buildGroupInvitationLink(window.location.origin + window.location.pathname, group.invitationCode);
+  }
+  async copyInvitationLink(group: GroupDetails): Promise<void> {
+    const link = this.invitationLink(group);
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      this.snackBar.open(this.i18n.translate('groups.invitationLinkCopied'), this.i18n.translate('common.close'), {
+        duration: 3000,
+      });
+    } catch {
+      this.snackBar.open(link, this.i18n.translate('common.close'), { duration: 8000 });
+    }
   }
   deleteSelected(): void {
     const group = this.selected();

@@ -134,10 +134,19 @@
               </div>
             </div>
           }
-          <p class="invitation-code">
-            {{ 'groups.invitationCode' | translate }}:
-            <strong class="code">{{ currentGroup.invitationCode }}</strong>
-          </p>
+          <div class="invitation-panel">
+            <div class="invitation-copy">
+              <span>{{ 'groups.invitationLink' | translate }}</span>
+              <strong class="invitation-url">{{ invitationLink(currentGroup) }}</strong>
+              <small>
+                {{ 'groups.invitationCode' | translate }}:
+                <span class="code">{{ currentGroup.invitationCode }}</span>
+              </small>
+            </div>
+            <button mat-stroked-button type="button" (click)="copyInvitationLink(currentGroup)">
+              {{ 'groups.copyInvitationLink' | translate }}
+            </button>
+          </div>
           <mat-list>
             @for (player of currentGroup.leaderboard; track player.userId; let rank = $index) {
               <mat-list-item>
