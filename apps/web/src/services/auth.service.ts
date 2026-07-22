@@ -1,6 +1,8 @@
-import { HttpClient, HttpInterceptorFn } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 
 export type CompetitionKey = 'LEC' | 'LCK' | 'LCS' | 'LPL' | 'MSI' | 'FIRST_STAND' | 'WORLDS' | 'EWC';
@@ -21,9 +23,24 @@ const TOKEN_KEY = 'mpp-auth-token';
 const USER_KEY = 'mpp-auth-user';
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
   const token = localStorage.getItem(TOKEN_KEY);
-  return next(token ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request);
+  const authenticatedRequest = token ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request;
+  return next(authenticatedRequest).pipe(
+    catchError((error: unknown) => {
+      if (isLoginRequiredError(error)) {
+        auth.logout();
+        void router.navigateByUrl('/predictions');
+      }
+      throw error;
+    }),
+  );
 };
+
+export function isLoginRequiredError(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && error.status === 401 && error.error?.message === 'Connexion requise';
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
